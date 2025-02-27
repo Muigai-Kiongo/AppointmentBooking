@@ -1,0 +1,74 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<section style='flex-basis:80%;'>
+    <h1>Appointment History</h1>
+
+    {% if upcoming_bookings %}
+        <div class="booking-list">
+            {% for booking in upcoming_bookings %}
+            <a href="{% url 'appointments-detail' booking.pk %}" class="upcoming-booking">
+                <p>
+                    {{ booking.appointment_date }}, {{ booking.appointment_time }} | Doctor: {{ booking.doctor.user.username }} | Type: {{ booking.appointment_type }}
+                </p>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No upcoming appointments.</p>
+    {% endif %}
+
+    {% if past_bookings %}
+        <div class="booking-list">
+            {% for booking in past_bookings %}
+            <p class="past-booking">
+                {{ booking.appointment_date }}, {{ booking.appointment_time }} | Doctor: {{ booking.doctor.user.username }} | Type: {{ booking.appointment_type }}
+            </p>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No past appointments.</p>
+    {% endif %}
+</section>
+
+<style>
+section {
+    padding: 20px;
+    background-color: #f9f9f9;
+    overflow-y: auto; 
+}
+
+.booking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* Space between items */
+}
+
+.past-booking {
+    background-color: rgba(255, 99, 71, 0.3); /* Light red background */
+    padding: 10px;
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(255, 0, 0, 0.5);
+    overflow: hidden;
+    font-size: 14px; /* Consistent font size */
+}
+
+.upcoming-booking {
+    display: block;
+    border: thin;
+    background-color: rgba(144, 238, 144, 0.3); /* Light green background */
+    padding: 10px;
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 255, 0, 0.5);
+    text-decoration: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    color: black;
+    font-size: 14px; /* Consistent font size */
+}
+
+.upcoming-booking:hover {
+    background-color: rgba(144, 238, 144, 0.5); /* Darker on hover */
+    box-shadow: 0 4px 10px rgba(0, 255, 0, 0.7); /* Increase shadow on hover */
+}
+</style>
+{% endblock %}

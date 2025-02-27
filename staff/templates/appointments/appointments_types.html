@@ -1,0 +1,26 @@
+{% extends 'staff.html' %}
+
+{% block content %}
+<h1>Appointment Types</h1>
+<a href="{% url 'appointment_type_create' %}">Create New Appointment Type</a>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Duration</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for appointment_type in appointment_types %}
+        <tr>
+            <td>{{ appointment_type.name }}</td>
+            <td>{{ appointment_type.duration }}</td>
+            <td>
+                <a href="{% url 'appointment_type_edit' appointment_type.pk %}">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

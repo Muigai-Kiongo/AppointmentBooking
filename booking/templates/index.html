@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Your health management platform for booking appointments and accessing health tips." />
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <style>
+      
+p {
+    color: #666; /* Gray color for paragraph text */
+    font-size: 16px; /* Font size for paragraphs */
+}
+
+.bookBtn {
+    display: inline-block; /* Make the link a block element */
+    padding: 10px 20px; /* Padding for the button */
+    background-color: #007bff; /* Primary button color */
+    color: white; /* Text color */
+    text-decoration: none; /* Remove underline */
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+.bookBtn:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+</style>
+</head>
+<body>
+    <div class='body-content'>
+        {% include 'components/aside.html' %}
+
+        <div class="container">
+            {% block content %}
+            <section>
+                <h2>Upcoming Appointments</h2>
+                <div>
+                    {% if upcoming_bookings %}
+                        <ul>
+                            {% for booking in upcoming_bookings %}
+                                <li>{{ booking.appointment_date }} - {{ booking.description }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No upcoming appointments.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section>
+                <h2>Health Tips</h2>
+                <div>
+                    {% if health_tips %}
+                        <ul>
+                            {% for tip in health_tips %}
+                                <li>{{ tip.content }}</li>  <!-- Assuming 'content' is a field in HealthTip model -->
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No health tips available at the moment.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <div>
+                <p>Make an Appointment Here</p>
+                <a href="/book_appointment/" aria-label="Book an appointment" class='bookBtn'>Book Here</a>
+            </div>
+            {% endblock %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,95 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2;
+    font-family: 'Arial', sans-serif;
+    width: 100%;
+    position:fixed;
+}
+
+.body-content {
+    display: flex;
+    height: 100vh;
+}
+.container {
+    flex: 1;
+    padding: 40px;
+    background-color: #ffffff;
+    overflow-y: auto;
+    box-shadow: 0 0 10px rgba(0, 0, 1, 3);
+}
+
+/* Sidebar styles */
+aside {
+    width: 250px;
+    background-color: #4A90E2;
+    color: white;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 1);
+}
+
+aside h2 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+aside ul {
+    list-style: none;
+    padding: 0;
+}
+
+aside ul li {
+    margin: 15px 0;
+}
+
+aside ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1em;
+    transition: color 0.3s;
+}
+
+.sidebar {
+    margin: 0;
+    width: 250px; /* Set the width of the sidebar */
+    background-color: #233142; /* Dark background */
+    padding: 20px; /* Padding around the content */
+    box-shadow: 5px 0 10px rgba(0, 0, 0, 2); /* Subtle shadow */
+    /* position: fixed; Fixed position */
+    height: 100%; /* Full height */
+    overflow-y: hidden; /* Allow scrolling if content overflows */
+}
+
+.sidebar-title {
+    text-decoration: none; /* Remove underline from title link */
+    color: #ffffff; /* White text color */
+    font-size: 1.5em; /* Larger font size for title */
+    margin-bottom: 20px; /* Space below the title */
+    display: block; /* Make the title fill the item */
+    text-align: center; /* Center the title */
+}
+
+.sidebar-menu {
+    list-style-type: none; /* Remove default list styling */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margin */
+}
+
+.sidebar-item {
+    margin: 15px 0; /* Space between items */
+}
+
+.sidebar-link {
+    text-decoration: none; /* Remove underline from links */
+    color: #ffffff; /* White text color */
+    font-weight: bold; /* Bold text */
+    padding: 10px; /* Padding around the link */
+    display: block; /* Make the link fill the item */
+    border-radius: 4px; /* Rounded corners */
+    transition: background-color 0.3s, color 0.3s; /* Smooth background and color transition */
+}
+
+.sidebar-link:hover {
+    background-color: #4A90E2; /* Change background on hover */
+    color: #ffffff; /* Keep text color white on hover */
+}

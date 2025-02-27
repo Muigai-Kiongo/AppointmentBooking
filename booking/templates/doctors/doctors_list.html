@@ -1,0 +1,17 @@
+{%extends 'index.html'%}
+{%load static%}
+
+{%block content%}
+
+<div>
+<h1>Available Doctors</h1>
+    <ul>
+        {% for doctor in doctors %}
+            <li>
+                <strong>{{ doctor.user.username }}</strong> - {{ doctor.specialty }}
+                <a href="{% url 'appointmentBooking' %}">Book Appointment</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

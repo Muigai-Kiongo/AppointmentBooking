@@ -1,0 +1,307 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Staff Dashboard</title>
+    <style>
+        html, body {
+            height: 100%; /* Ensure full height */
+            width:100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #f4f7fa; /* Light background color for the whole page */
+            position:fixed;
+        }
+
+        header {
+            color: #fff;
+            margin: 0;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            padding: 20px;
+        }
+
+        .subnav {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            background-color: #444;
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .subnav a {
+            text-decoration: none;
+            padding: 10px 15px;
+            color: #fff;
+            transition: background-color 0.3s;
+        }
+
+        .subnav a:hover {
+            background-color: #555;
+            border-radius: 5px; /* Rounded corners for hover effect */
+        }
+
+        .body-content {
+            display: flex; /* Use flexbox for layout */
+            height: 100%; /* Adjust height to fit the navbar */
+            margin: 0; /* Remove margin */
+        }
+
+        .aside {
+            flex: 1; /* Flex-grow for aside */
+            border-right: 2px solid #ccc; /* Right border for separation */
+        }
+
+        .content {
+            flex: 3; /* Flex-grow for main content */
+            padding: 20px; /* Padding for content */
+            background-color: #ffffff; /* White background for content */
+        }
+
+        h2 {
+            color: #333; /* Darker color for headings */
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
+        }
+
+        tr:active {
+            background-color: #e0e0e0;
+        }
+
+        .form-btn {
+            margin-left: 20px;
+        }
+
+        button {
+            background-color: #dc3545; /* Red color for logout button */
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #c82333; /* Darker red on hover */
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .search-container input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 300px; /* Fixed width for the search input */
+        }
+
+        .search-container button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff; /* Blue color for search button */
+            color: white;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .search-container button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="body-content">
+        <div class="aside">
+            {% include 'components/staff_aside.html' %}
+        </div>
+
+        <div class="content">
+            <div class="container">
+                {% block content %}
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search by Username..." />
+                    <button onclick="searchBookings()">Search</button>
+                </div>
+
+                <table id="todayBookings">
+                    <h2>Today's Appointments ({{ today_bookings.count }})</h2>
+                    <thead>
+                        <tr>
+                            <th><strong>Patient:</strong></th>
+                            <th><strong>Appointment Type:</strong></th>
+                            <th><strong>Date:</strong></th>
+                            <th><strong>Time:</strong></th>
+                            <th><strong>Status:</strong></th>
+                            <th><strong>Doctor:</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if today_bookings %} {% for booking in today_bookings %}
+                        <tr onclick="window.location='{% url 'appointment_detail' booking.id %}'" style="cursor: pointer">
+                            <td>{{ booking.user.username }}</td>
+                            <td>{{ booking.appointment_type.name }}</td>
+                            <td>{{ booking.appointment_date }}</td>
+                            <td>{{ booking.appointment_time }}</td>
+                            <td>{{ booking.status }}</td>
+                            <td>{{ booking.doctor.user.username }}</td>
+                        </tr>
+                        {% endfor %} {% else %}
+                        <tr>
+                            <td colspan="5">No Appointments available for today.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+
+                <table id="tomorrowBookings">
+                    <h2>Tommorow's Appointments ({{ tomorrow_bookings.count }})</h2>
+                    <thead>
+                        <tr>
+                            <th><strong>Patient:</strong></th>
+                            <th><strong>Appointment Type:</strong></th>
+                            <th><strong>Date:</strong></th>
+                            <th><strong>Time:</strong></th>
+                            <th><strong>Status:</strong></th>
+                            <th><strong>Doctor:</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if tomorrow_bookings %} {% for booking in tomorrow_bookings %}
+                        <tr onclick="window.location='{% url 'appointment_detail' booking.id %}'" style="cursor: pointer">
+                            <td>{{ booking.user.username }}</td>
+                            <td>{{ booking.appointment_type.name }}</td>
+                            <td>{{ booking.appointment_date }}</td>
+                            <td>{{ booking.appointment_time }}</td>
+                            <td>{{ booking.status }}</td>
+                            <td>{{ booking.doctor.user.username }}</td>
+                        </tr>
+                        {% endfor %} {% else %}
+                        <tr>
+                            <td colspan="5">No Appointments available for tomorrow.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+
+                <table id="upcomingBookings">
+                    <h2>Other Appointments ({{ other_bookings.count }})</h2>
+                    <thead>
+                        <tr>
+                            <th><strong>Patient:</strong></th>
+                            <th><strong>Appointment Type:</strong></th>
+                            <th><strong>Date:</strong></th>
+                            <th><strong>Time:</strong></th>
+                            <th><strong>Status:</strong></th>
+                            <th><strong>Doctor:</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if other_bookings %} {% for booking in other_bookings %}
+                        <tr onclick="window.location='{% url 'appointment_detail' booking.id %}'" style="cursor: pointer">
+                            <td>{{ booking.user.username }}</td>
+                            <td>{{ booking.appointment_type.name }}</td>
+                            <td>{{ booking.appointment_date }}</td>
+                            <td>{{ booking.appointment_time }}</td>
+                            <td>{{ booking.status }}</td>
+                            <td>{{ booking.doctor.user.username }}</td>
+                        </tr>
+                        {% endfor %} {% else %}
+                        <tr>
+                            <td colspan="5">No Other Appointments available.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to search bookings by username
+        function searchBookings() {
+            const input = document.getElementById("searchInput").value.toLowerCase();
+            const tables = [
+                "todayBookings",
+                "tomorrowBookings",
+                "upcomingBookings",
+            ];
+
+            tables.forEach((tableId) => {
+                const table = document.getElementById(tableId);
+                const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+                let found = false;
+
+                for (let i = 0; i < rows.length; i++) {
+                    const cells = rows[i].getElementsByTagName("td");
+                    if (cells.length > 0) {
+                        const customerName = cells[0].textContent.toLowerCase();
+                        if (customerName.includes(input)) {
+                            rows[i].style.display = ""; // Show row
+                            found = true;
+                        } else {
+                            rows[i].style.display = "none"; // Hide row
+                        }
+                    }
+                }
+
+                // If no rows found, you can optionally show a message
+                if (!found) {
+                    const emptyRow = document.createElement("tr");
+                    emptyRow.innerHTML = `<td colspan="${rows[0].getElementsByTagName("td").length}">No Appointments found for "${input}".</td>`;
+                    table.getElementsByTagName("tbody")[0].appendChild(emptyRow);
+                } else {
+                    // Remove any previously added empty row if found
+                    const existingRows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+                    for (let j = 0; j < existingRows.length; j++) {
+                        if (existingRows[j].textContent.includes("No Appointments found")) {
+                            existingRows[j].remove();
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

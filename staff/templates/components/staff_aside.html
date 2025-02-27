@@ -1,0 +1,105 @@
+<aside class="sidebar">
+    <h2 class='title'><a href='/' class="sidebar-title">
+        Health Plus +</a></h2>
+
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href='/staff/' class="sidebar-link">Dashboard</a>
+        </li>
+        <li class="sidebar-item">
+            <a href='/staff/appointment-types/' class="sidebar-link">Appointment Types</a>
+        </li>
+        <li class="sidebar-item">
+            <a href='/staff_reports/' class="sidebar-link">Health Reports</a>
+        </li>
+        <li class="sidebar-item">
+            <a href='/staff/doctors/' class="sidebar-link">Doctors</a>
+        </li>
+        {% comment %} <li class="sidebar-item">
+            <a href='/accounts/profile/' class="sidebar-link">Profile</a>
+        </li> {% endcomment %}
+        {% if user.is_authenticated %}
+            <h3>{{user.username}}</h3>
+            {% csrf_token %}
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">Logout</button>
+            </form>
+            {% else %}
+            <a href="/accounts/login" class="login" style='text-decoration:none; color:white;'>Login</a>
+            {% endif %}
+    </ul>
+</aside>
+<style>
+    .sidebar {
+        background-color: #2c3e50; /* Darker background for the sidebar */
+        color: #ecf0f1; /* Light text color */
+        padding: 20px; /* Padding around the sidebar */
+        height: 100%; /* Full height */
+        display: flex;
+        flex-direction: column; /* Stack items vertically */
+    }
+    
+    .sidebar-title {
+        font-size: 24px; /* Larger font size for the title */
+        font-weight: bold; /* Bold title */
+        color: #ecf0f1; /* Light color for the title */
+        text-decoration: none; /* Remove underline */
+        margin-bottom: 20px; /* Space below the title */
+        text-align: center; /* Center the title */
+    }
+    
+    .sidebar-menu {
+        list-style: none; /* Remove default list styling */
+        padding: 0; /* Remove padding */
+        margin: 0; /* Remove margin */
+    }
+    
+    .sidebar-item {
+        margin: 10px 0; /* Space between items */
+    }
+    
+    .sidebar-link {
+        color: #ecf0f1; /* Light color for links */
+        text-decoration: none; /* Remove underline */
+        padding: 10px 15px; /* Padding for links */
+        display: block; /* Make the link fill the item */
+        border-radius: 5px; /* Rounded corners */
+        transition: background-color 0.3s; /* Smooth background transition */
+    }
+    
+    .sidebar-link:hover {
+        background-color: #34495e; /* Darker background on hover */
+    }
+    
+    .username {
+        margin-top: 20px; /* Space above username */
+        font-size: 18px; /* Font size for username */
+        text-align: center; /* Center the username */
+    }
+    
+    .logout-button {
+        background-color: #e74c3c; /* Red color for logout button */
+        color: white; /* White text */
+        border: none; /* No border */
+        padding: 10px 15px; /* Padding for button */
+        border-radius: 5px; /* Rounded corners */
+        cursor: pointer; /* Pointer cursor */
+        width: 100%; /* Full width */
+        margin-top: 10px; /* Space above button */
+        transition: background-color 0.3s; /* Smooth background transition */
+    }
+    
+    .logout-button:hover {
+        background-color: #c0392b; /* Darker red on hover */
+    }
+    
+    .login {
+        color: #ecf0f1; /* Light color for login link */
+        text-decoration: none; /* Remove underline */
+        text-align: center; /* Center the login link */
+        margin-top: 20px; /* Space above login link */
+        display: block; /* Make it a block element */
+    }
+</style>
+

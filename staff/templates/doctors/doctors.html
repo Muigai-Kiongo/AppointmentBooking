@@ -1,0 +1,36 @@
+{% extends 'staff.html' %}
+
+{% block content %}
+<h1>Doctors</h1>
+<a href="{% url 'doctor_create' %}">Add New Doctor</a>
+<table>
+    <thead>
+        <tr>
+            <th>Specialty</th>
+            <th>Qualifications</th>
+            <th>Experience (Years)</th>
+            <th>Languages Spoken</th>
+            <th>Available Days</th>
+            <th>Available Time Start</th>
+            <th>Available Time End</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for doctor in doctors %}
+        <tr>
+            <td>{{ doctor.specialty }}</td>
+            <td>{{ doctor.qualifications }}</td>
+            <td>{{ doctor.experience_years }}</td>
+            <td>{{ doctor.languages_spoken }}</td>
+            <td>{{ doctor.available_days }}</td>
+            <td>{{ doctor.available_time_start }}</td>
+            <td>{{ doctor.available_time_end }}</td>
+            <td>
+                <a href="{% url 'doctor_edit' doctor.pk %}">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

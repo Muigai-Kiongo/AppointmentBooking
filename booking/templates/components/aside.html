@@ -1,0 +1,35 @@
+<aside class="sidebar">
+    <h2 class='title'><a href='/' class="sidebar-title">
+        Health Plus +</a></h2>
+
+    <ul class="sidebar-menu">
+        <li class="sidebar-item">
+            <a href='/' class="sidebar-link">Dashboard</a>
+        </li>
+        <li class="sidebar-item">
+            <a href='/appointments' class="sidebar-link">My Appointments</a>
+        </li>
+        <li class="sidebar-item">
+            <a href='/notifications/' class="sidebar-link">Notifications</a>
+        </li>
+        <li class="sidebar-item">
+            <a href='/reports/' class="sidebar-link">Health Reports</a>
+        </li>
+        <li class="sidebar-item">
+            <a href='/doctors/' class="sidebar-link">Doctors</a>
+        </li>
+         <li class="sidebar-item">
+            <a href='/accounts/profile/' class="sidebar-link">Profile</a>
+        </li> 
+        {% if user.is_authenticated %}
+            <h3>{{user.username}}</h3>
+            {% csrf_token %}
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">Logout</button>
+            </form>
+            {% else %}
+            <a href="/accounts/login" class="login" style='text-decoration:none; color:white;'>Login</a>
+            {% endif %}
+    </ul>
+</aside>

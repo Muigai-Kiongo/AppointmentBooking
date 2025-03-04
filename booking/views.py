@@ -6,6 +6,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.template.loader import render_to_string
 from weasyprint import HTML
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 
 current_date = datetime.now().date()
@@ -126,8 +127,8 @@ def reports_view(request):
         form = ReportForm(request.POST)
         if form.is_valid():
             report_type = form.cleaned_data['report_type']
-            bookings = get_appointments(report_type)  # Helper function to get bookings
-            report_html = render_to_string(f'reports/{report_type}_report.html', {'bookings': bookings})
+            appointments = get_appointments(report_type)  # Helper function to get bookings
+            report_html = render_to_string(f'reports/{report_type}_report.html', {'appointments': appointments})
     else:
         form = ReportForm()
 
@@ -141,13 +142,13 @@ def get_appointments(report_type):
     now = timezone.now()
     if report_type == 'weekly':
         week_start = now - timezone.timedelta(days=7)
-        return Appointment.objects.filter(date__gte=week_start)
+        return Appointment.objects.filter(appointment_date__gte=week_start.date())  # Use appointment_date
     elif report_type == 'monthly':
         month_start = now.replace(day=1)
-        return Appointment.objects.filter(date__gte=month_start)
+        return Appointment.objects.filter(appointment_date__gte=month_start.date())  # Use appointment_date
     elif report_type == 'yearly':
         year_start = now.replace(month=1, day=1)
-        return Appointment.objects.filter(date__gte=year_start)
+        return Appointment.objects.filter(appointment_date__gte=year_start.date())  # Use appointment_date
     return Appointment.objects.none()
 
 def generate_pdf_response(html_string, filename):
@@ -158,6 +159,6 @@ def generate_pdf_response(html_string, filename):
     return response
 
 def download_report(request, report_type):
-    bookings = get_appointments(report_type)
-    html_string = render_to_string(f'reports/{report_type}_report.html', {'bookings': bookings})
+    appointments = get_appointments(report_type)
+    html_string = render_to_string(f'reports/{report_type}_report.html', {'appointments': appointments})
     return generate_pdf_response(html_string, f'{report_type}_report.pdf')

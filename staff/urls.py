@@ -10,5 +10,8 @@ urlpatterns = [
     path('doctors/',views.doctor_list, name='doctor_list'),
     path('doctors/create/', views.doctor_create, name='doctor_create'),
     path('doctors/edit/<int:pk>/', views.doctor_edit, name='doctor_edit'),
+    path('staff_reports/', views.reports_view, name = 'reports-view'),
+    path('staff_reports/download/<str:report_type>/', views.download_report, name='download_report'),
+
 ]
 

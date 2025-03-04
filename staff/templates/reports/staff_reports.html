@@ -1,9 +1,39 @@
 {% extends 'staff.html' %}
 {%load static%}
-<link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
 {%block content%}
 
+<section >
+    <h1>Reports</h1>
+    <div class="container">
 
+        <h1>Generate Reports</h1>
+        
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Generate Report</button>
+        </form>
+    
+        <div class="report-container">
+            {% if report_html %}
+                <h2>{{ report_type|title }} Report</h2>
+                <div>{{ report_html|safe }}</div>
+                <a href="{% url 'download_report' report_type %}" class="btn">Download PDF</a>
+            {% endif %}
+        </div>
+     
+</section>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    .report-container {
+        margin-top: 20px;
+    }
+    button {
+        margin-top: 10px;
+    }
+</style>
 
 {%endblock%}

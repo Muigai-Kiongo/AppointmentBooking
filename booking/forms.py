@@ -1,4 +1,7 @@
 from django import forms
+from django.utils import timezone
+from datetime import timedelta
+from django.core.exceptions import ValidationError
 from .models import UserProfile, Doctor, AppointmentType,Appointment, HealthRecord, Notification, Payment
 
 class UserProfileForm(forms.ModelForm):
@@ -27,20 +30,16 @@ class AppointmentForm(forms.ModelForm):
         fields = ['doctor', 'appointment_type', 'appointment_date', 'appointment_time']
         widgets = {
             'doctor': forms.Select(attrs={
-                'class': 'form-control',
                 'placeholder': 'Select Doctor',
             }),
             'appointment_type': forms.Select(attrs={
-                'class': 'form-control',
                 'placeholder': 'Select Appointment Type',
             }),
             'appointment_date': forms.DateInput(attrs={
-                'class': 'form-control',
                 'type': 'date',
                 'placeholder': 'Select Appointment Date',
             }),
             'appointment_time': forms.TimeInput(attrs={
-                'class': 'form-control',
                 'type': 'time',
                 'placeholder': 'Select Appointment Time',
             }),
@@ -57,18 +56,38 @@ class AppointmentForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        appointment_date = cleaned_data.get("appointment_date")
-        appointment_time = cleaned_data.get("appointment_time")
+        doctor = cleaned_data.get('doctor')
+        appointment_date = cleaned_data.get('appointment_date')
+        appointment_time = cleaned_data.get('appointment_time')
 
-        # Example validation: Check if the appointment is in the past
-        if appointment_date and appointment_time:
-            from datetime import datetime
-            appointment_datetime = datetime.combine(appointment_date, appointment_time)
-            if appointment_datetime < datetime.now():
-                self.add_error('appointment_date', 'The appointment date and time cannot be in the past.')
+        if doctor and appointment_date and appointment_time:
+            # Combine date and time into a single datetime object
+            appointment_datetime = timezone.datetime.combine(appointment_date, appointment_time)
+
+            # Check for existing appointments for the same doctor at the same time
+            existing_appointments = Appointment.objects.filter(
+                doctor=doctor,
+                appointment_date=appointment_date,
+                appointment_time=appointment_time
+            )
+
+            if existing_appointments.exists():
+                raise ValidationError("This doctor is already booked at this time.")
+
+            # Check for appointments within one hour before or after the requested time
+            one_hour_before = appointment_datetime - timedelta(hours=1)
+            one_hour_after = appointment_datetime + timedelta(hours=1)
+
+            conflicting_appointments = Appointment.objects.filter(
+                doctor=doctor,
+                appointment_date=appointment_date,
+                appointment_time__range=(one_hour_before.time(), one_hour_after.time())
+            )
+
+            if conflicting_appointments.exists():
+                raise ValidationError("This doctor is booked within one hour of the requested time.")
 
         return cleaned_data
-
 
 
 class HealthRecordForm(forms.ModelForm):

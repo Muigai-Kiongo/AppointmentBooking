@@ -1,17 +1,64 @@
-{%extends 'index.html'%}
-{%load static%}
+{% extends 'index.html' %}
+{% load static %}
 
-{%block content%}
+{% block content %}
 
-<div>
-<h1>Available Doctors</h1>
-    <ul>
-        {% for doctor in doctors %}
-            <li>
-                <strong>{{ doctor.user.username }}</strong> - {{ doctor.specialty }}
-                <a href="{% url 'appointmentBooking' %}">Book Appointment</a>
-            </li>
-        {% endfor %}
-    </ul>
+<div class="container">
+    <h1>Available Doctors</h1>
+    {% if doctors %}
+        <div class="doctor-list">
+            {% for doctor in doctors %}
+                <div class="doctor-card">
+                    <h2>{{ doctor.user.username }}</h2>
+                    <p><strong>Specialty:</strong> {{ doctor.specialty }}</p>
+                    <p><strong>Qualifications:</strong> {{ doctor.qualifications }}</p>
+                    <p><strong>Experience:</strong> {{ doctor.experience_years }} years</p>
+                    <p><strong>Languages Spoken:</strong> {{ doctor.languages_spoken|default:"Not specified" }}</p>
+                    <p><strong>Rating:</strong> {{ doctor.rating }} / 5</p>
+                    <p><strong>Available Days:</strong> {{ doctor.available_days }}</p>
+                    <p><strong>Available Time:</strong> {{ doctor.available_time_start }} - {{ doctor.available_time_end }}</p>
+                    <a class="btn btn-primary" href="{% url 'appointmentBooking' %}">Book Appointment</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No doctors available at the moment.</p>
+    {% endif %}
 </div>
+
+<style>
+    {% comment %} .container {
+        max-width: 100;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .doctor-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    } {% endcomment %}
+    .doctor-card {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .doctor-card h2 {
+        margin: 0 0 10px;
+    }
+    .btn {
+        display: inline-block;
+        padding: 10px 15px;
+        color: white;
+        background-color: #007bff;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+    }
+</style>
+
 {% endblock %}

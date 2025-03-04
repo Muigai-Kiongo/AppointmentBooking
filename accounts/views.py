@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django import forms
 from booking.models import UserProfile
 from booking.forms import UserProfileForm
+
 # Form for editing user information
 class UserEditForm(forms.ModelForm):
     class Meta:
@@ -70,3 +71,19 @@ def profile(request):
         'form': form,
     }
     return render(request, 'profile/profile.html', context)
+
+# views.py
+
+
+@login_required
+def edit_profile(request):
+    user_profile = request.user.user_profile  # Assuming you have a related user profile model
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=user_profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')  # Redirect to the profile page after saving
+    else:
+        form = UserProfileForm(instance=user_profile)
+    
+    return render(request, 'edit_profile.html', {'form': form})

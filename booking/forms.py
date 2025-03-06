@@ -10,18 +10,49 @@ class UserProfileForm(forms.ModelForm):
         fields = ['phone_number', 'address', 'date_of_birth', 'insurance_provider', 'insurance_policy_number']
 
 
+from django import forms
+from django.contrib.auth.models import User
+from .models import Doctor
+
+from django import forms
+from django.contrib.auth.models import User
+from .models import Doctor
+
 class DoctorForm(forms.ModelForm):
+    # Dropdown for selecting existing users
+    user = forms.ModelChoiceField(
+        queryset=User .objects.all(),
+        required=True,
+        label='Select User'
+    )
+
+    # Remove the password field
+    # password = forms.CharField(widget=forms.PasswordInput, required=True, label='Password')
+
+    # Time choices for available time start and end
+    TIME_CHOICES = [(f"{hour:02d}:{minute:02d}", f"{hour:02d}:{minute:02d}") for hour in range(24) for minute in (0, 15, 30, 45)]
+
+    available_time_start = forms.ChoiceField(choices=TIME_CHOICES, required=True, label='Available Time Start')
+    available_time_end = forms.ChoiceField(choices=TIME_CHOICES, required=True, label='Available Time End')
+
     class Meta:
         model = Doctor
-        fields = ['specialty', 'qualifications', 'experience_years', 'languages_spoken', 'available_days', 'available_time_start', 'available_time_end']
-
-
-
+        fields = [
+            'user',  # Include the user dropdown
+            'specialty',
+            'qualifications',
+            'experience_years',
+            'languages_spoken',
+            'available_days',
+            'available_time_start',
+            'available_time_end'
+        ]
 
 class AppointmentTypeForm(forms.ModelForm):
     class Meta:
         model = AppointmentType
         fields = ['name', 'duration']
+
 
 
 class AppointmentForm(forms.ModelForm):
@@ -42,6 +73,8 @@ class AppointmentForm(forms.ModelForm):
             'appointment_time': forms.TimeInput(attrs={
                 'type': 'time',
                 'placeholder': 'Select Appointment Time',
+                'min': '06:00',  # Set minimum time to 6 AM
+                'max': '20:00',  # Set maximum time to 8 PM
             }),
         }
 
@@ -63,6 +96,11 @@ class AppointmentForm(forms.ModelForm):
         if doctor and appointment_date and appointment_time:
             # Combine date and time into a single datetime object
             appointment_datetime = timezone.datetime.combine(appointment_date, appointment_time)
+
+            # Check if the appointment time is within the allowed range
+            if appointment_time < timezone.datetime.strptime('06:00', '%H:%M').time() or \
+               appointment_time > timezone.datetime.strptime('20:00', '%H:%M').time():
+                raise ValidationError("Appointment time must be between 6 AM and 8 PM.")
 
             # Check for existing appointments for the same doctor at the same time
             existing_appointments = Appointment.objects.filter(

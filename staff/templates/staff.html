@@ -20,8 +20,52 @@
         }
 
         header {
-            color: #fff;
-            margin: 0;
+            background-color: #233142; /* Dark background for the header */
+            padding: 10px 20px; /* Padding around the header */
+            color: white; /* Text color */
+            display: flex; /* Use flexbox for layout */
+            justify-content: flex-end; /* Space between items */
+            align-items: center; /* Center items vertically */
+
+        }
+    
+        nav {
+            display: flex; /* Use flexbox for navigation items */
+            align-items: center; /* Center items vertically */
+        }
+    
+        h3 {
+            margin: 0; /* Remove default margin */
+            font-size: 20px; /* Font size for username */
+        }
+    
+        .login {
+            margin-left: 20px; /* Space between username and login link */
+            padding: 10px 15px; /* Padding for the login button */
+            background-color: #007bff; /* Primary button color */
+            color: white; /* Text color */
+            border-radius: 5px; /* Rounded corners */
+            text-decoration: none; /* Remove underline */
+            transition: background-color 0.3s; /* Smooth transition for hover effect */
+        }
+    
+        .login:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+        }
+    
+        .logout-button {
+            margin-left: 20px; /* Space between username and logout button */
+            padding: 10px 15px; /* Padding for the logout button */
+            background-color: #dc3545; /* Danger button color */
+            color: white; /* Text color */
+            border: none; /* Remove border */
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer; /* Pointer cursor on hover */
+            transition: background-color 0.3s; /* Smooth transition for hover effect */
+        }
+    
+        .logout-button:hover {
+            background-color: #c82333; /* Darker shade on hover */
         }
 
         .navbar {
@@ -56,7 +100,7 @@
         .body-content {
             display: flex; /* Use flexbox for layout */
             height: 100%; /* Adjust height to fit the navbar */
-            margin: 0; /* Remove margin */
+            overflow:auto;
         }
 
         .aside {
@@ -150,6 +194,20 @@
     </style>
 </head>
 <body>
+    <header>
+        <nav>
+        {% if user.is_authenticated %}
+        <h3>{{user.username}}</h3>
+        {% csrf_token %}
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-button">Logout</button>
+        </form>
+        {% else %}
+        <a href="/accounts/login" class="login" style='text-decoration:none; color:white;'>Login</a>
+        {% endif %}
+    </nav>
+    </header>
     <div class="body-content">
         <div class="aside">
             {% include 'components/staff_aside.html' %}

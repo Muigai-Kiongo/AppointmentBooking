@@ -17,73 +17,45 @@ class UserEditForm(forms.ModelForm):
 def profile(request):
     user = request.user  # Get the currently logged-in user
 
+    # Get or create the user profile
+    user_profile, created = UserProfile.objects.get_or_create(user=user)
+
     if request.method == 'POST':
-        form = UserEditForm(request.POST, instance=user)
-        if form.is_valid():
-            form.save()  # Save the updated user information
+        user_form = UserEditForm(request.POST, instance=user)  # Edit user information
+        profile_form = UserProfileForm(request.POST, instance=user_profile)  # Edit user profile information
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()  # Save the updated user information
+            profile_form.save()  # Save the updated user profile information
+            messages.success(request, 'Profile updated successfully!')
             return redirect('profile')  # Redirect to the profile page after saving
     else:
-        form = UserEditForm(instance=user)  # Pre-fill the form with the user's current information
+        user_form = UserEditForm(instance=user)  # Pre-fill the form with the user's current information
+        profile_form = UserProfileForm(instance=user_profile)  # Pre-fill the profile form
 
     context = {
-        'form': form,
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'user': user,  # Pass the user object if needed
+        'user_profile': user_profile,  # Pass the user profile object for display
     }
     return render(request, 'profile/profile.html', context)
 
-def signUp (request):
+def signUp(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
-            redirect('login')
-            messages.success(request, ('Registration successful!'))
-            return redirect('login')
+            messages.success(request, 'Registration successful!')
+            return redirect('login')  # Ensure this redirect is returned
     else:
-
         form = UserCreationForm()
-
-        context= {
-            'form':form,
-            'title': 'Register'
-        }
-
-    return render(request, 'registration/register.html', context)
-
-
-
-# def user_profile(request):
-#     return render(request, 'profile/profile.html', {'user_profile': request.user.userprofile})
-
-def profile(request):
-    user = request.user  # Get the currently logged-in user
-
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, instance=user)
-        if form.is_valid():
-            form.save()  # Save the updated user information
-            return redirect('profile')  # Redirect to the profile page after saving
-    else:
-        form = UserProfileForm(instance=user)  # Pre-fill the form with the user's current information
 
     context = {
         'form': form,
+        'title': 'Register'
     }
-    return render(request, 'profile/profile.html', context)
 
-# views.py
-
-
-@login_required
-def edit_profile(request):
-    user_profile = request.user.user_profile  # Assuming you have a related user profile model
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, instance=user_profile)
-        if form.is_valid():
-            form.save()
-            return redirect('profile')  # Redirect to the profile page after saving
-    else:
-        form = UserProfileForm(instance=user_profile)
-    
-    return render(request, 'edit_profile.html', {'form': form})
+    return render(request, 'registration/register.html', context)

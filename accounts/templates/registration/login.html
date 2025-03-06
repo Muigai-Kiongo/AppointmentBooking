@@ -77,15 +77,25 @@
     </style>
 </head>
 <body>
+    
     <h2 class='typewriter'>Welcome Back!</h2>
     <main>
         <form method="post" class='form-container'>
             <h2>Login</h2>
             {% csrf_token %}
             {{ form.as_p }}
+            
             <p>Don't have an Account? <a href="/accounts/register">Register</a></p>
             <button type="submit" class="logBtn">Login</button>
+
+            <p>Login as 
+                <a href='/admin' >Admin</a>
+            </p>
+            <p> Login as 
+                <a href='/staff' >Staff</a>
+            </p>
         </form>
     </main>
 </body>
+
 </html>

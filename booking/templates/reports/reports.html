@@ -1,38 +1,70 @@
 {% extends "index.html" %}
 
 {% block content %}
-    
-<section >
+<section>
     <h1>Reports</h1>
     <div class="container">
 
         <h1>Generate Reports</h1>
         
-        <form method="post">
+        <form method="post" class="report-form">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit">Generate Report</button>
+            <button type="submit" class="btn generate-btn">Generate Report</button>
         </form>
     
         <div class="report-container">
             {% if report_html %}
                 <h2>{{ report_type|title }} Report</h2>
-                <div>{{ report_html|safe }}</div>
-                <a href="{% url 'download_report' report_type %}" class="btn">Download PDF</a>
+                
+                <a href="{% url 'download_report' report_type %}" class="btn download-btn">Download PDF</a>
+                <div class="report-content">{{ report_html|safe }}</div>
             {% endif %}
         </div>
-     
+    </div>
 </section>
+
 <style>
-    body {
-        font-family: Arial, sans-serif;
+
+   
+    .btn {
+        display: inline-block; /* Make the button a block element */
+        padding: 10px 20px; /* Padding for the button */
+        background-color: #007bff; /* Primary button color */
+        color: white; /* Text color */
+        text-decoration: none; /* Remove underline */
+        border-radius: 5px; /* Rounded corners */
+        border: none; /* Remove border */
+        cursor: pointer; /* Pointer cursor on hover */
+        transition: background-color 0.3s; /* Smooth transition for hover effect */
     }
+
+    .btn:hover {
+        background-color: #0056b3; /* Darker shade on hover */
+    }
+
+    .generate-btn {
+        margin-top: 10px; /* Space above the generate button */
+    }
+
     .report-container {
         margin-top: 20px;
+        padding: 15px; /* Padding inside the report container */
+        background-color: #f1f1f1; /* Light gray background for the report section */
+        border-radius: 5px; /* Rounded corners */
     }
-    button {
-        margin-top: 10px;
+
+    .report-content {
+        margin-top: 10px; /* Space above the report content */
+    }
+
+    /* Responsive design */
+    @media (max-width: 600px) {
+        
+        .btn {
+            width: 100%; /* Full width buttons on small screens */
+            text-align: center; /* Center text */
+        }
     }
 </style>
 {% endblock %}
-

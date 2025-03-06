@@ -8,6 +8,8 @@ from django.template.loader import render_to_string
 from weasyprint import HTML
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail, EmailMessage
+from django.conf import settings
 
 current_date = datetime.now().date()
 
@@ -22,6 +24,7 @@ def index(request):
 
     return render(request, 'index.html', context)
 
+
 @login_required
 def appointmentBooking(request):
     if request.method == 'POST':
@@ -30,17 +33,37 @@ def appointmentBooking(request):
             appointment = form.save(commit=False)
             appointment.user = request.user  # Set the user to the logged-in user
             appointment.save()
-            return redirect('home')  # Redirect to a success page
+
+            # Prepare the email
+            subject = 'Booking Successfully'
+            doctor = form.cleaned_data['doctor']
+            appointment_type = form.cleaned_data['appointment_type']
+            appointment_date = form.cleaned_data['appointment_date']
+            appointment_time = form.cleaned_data['appointment_time']
+
+            message = f"""
+            Hi {request.user.username}, you have successfully made an appointment.
+
+            Details:
+            Doctor: {doctor}
+            Appointment Type: {appointment_type}
+            Appointment Date: {appointment_date}
+            Appointment Time: {appointment_time}
+            """
+            recipient_list = [request.user.email]
+
+            send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
+
+            return redirect('home')  
     else:
         form = AppointmentForm()
 
-
-    context={
-
+    context = {
         'form': form
-
     }
-    return render(request, 'appointment/appointment.html',context)
+    return render(request, 'appointment/appointment.html', context)
+
+
 
 def appointmentListView(request):
     current_datetime = timezone.now()  # Get the current date and time

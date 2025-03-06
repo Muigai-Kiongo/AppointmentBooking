@@ -15,19 +15,7 @@
         <li class="sidebar-item">
             <a href='/staff/doctors/' class="sidebar-link">Doctors</a>
         </li>
-        {% comment %} <li class="sidebar-item">
-            <a href='/accounts/profile/' class="sidebar-link">Profile</a>
-        </li> {% endcomment %}
-        {% if user.is_authenticated %}
-            <h3>{{user.username}}</h3>
-            {% csrf_token %}
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit" class="logout-button">Logout</button>
-            </form>
-            {% else %}
-            <a href="/accounts/login" class="login" style='text-decoration:none; color:white;'>Login</a>
-            {% endif %}
+        
     </ul>
 </aside>
 <style>

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from booking.models import Appointment, AppointmentType, Doctor
 from booking.forms import AppointmentTypeForm,DoctorForm, ReportForm
+from django.contrib.auth.models import User
 from datetime import timedelta
 from django.utils import timezone
 from django.contrib.admin.views.decorators import staff_member_required
@@ -76,14 +77,17 @@ def doctor_list(request):
     doctors = Doctor.objects.all()
     return render(request, 'doctors/doctors.html', {'doctors': doctors})
 
+
 def doctor_create(request):
     if request.method == 'POST':
         form = DoctorForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('doctor_list')
+            # Create the Doctor instance
+            doctor = form.save()  # Save the doctor instance with the selected user
+            return redirect('doctor_list')  # Redirect to a success page
     else:
         form = DoctorForm()
+    
     return render(request, 'doctors/doctors_edit.html', {'form': form})
 
 def doctor_edit(request, pk):

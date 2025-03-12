@@ -10,6 +10,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
+from django.contrib import messages
 
 current_date = datetime.now().date()
 
@@ -53,8 +54,9 @@ def appointmentBooking(request):
             recipient_list = [request.user.email]
 
             send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
+            messages.success(request, 'Appointment successfully scheduled! Pay Booking  Fee( 200/-) to secure your Apointment')
 
-            return redirect('home')  
+            return redirect('appointmentBooking')  
     else:
         form = AppointmentForm()
 

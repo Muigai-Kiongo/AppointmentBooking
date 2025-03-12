@@ -9,6 +9,11 @@
         {{ form.as_p }}
         <button type="submit" id="bookAppointmentButton">Book Appointment</button>
     </form>
+    {% for message in messages %}
+        <script>
+            alert("{{ message }}");
+        </script>
+    {% endfor %}
 </div>
 <button id="payHereButton">Pay Here</button>
 

@@ -3,20 +3,14 @@ from django.utils import timezone
 from datetime import timedelta
 from django.core.exceptions import ValidationError
 from .models import UserProfile, Doctor, AppointmentType,Appointment, HealthRecord, Notification, Payment
+from django.contrib.auth.models import User
+
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['phone_number', 'address', 'date_of_birth', 'insurance_provider', 'insurance_policy_number']
 
-
-from django import forms
-from django.contrib.auth.models import User
-from .models import Doctor
-
-from django import forms
-from django.contrib.auth.models import User
-from .models import Doctor
 
 class DoctorForm(forms.ModelForm):
     # Dropdown for selecting existing users
@@ -96,6 +90,11 @@ class AppointmentForm(forms.ModelForm):
         if doctor and appointment_date and appointment_time:
             # Combine date and time into a single datetime object
             appointment_datetime = timezone.datetime.combine(appointment_date, appointment_time)
+
+
+            if appointment_date and appointment_date < timezone.now().date():
+                raise ValidationError("You cannot book an appointment for a past date.")
+
 
             # Check if the appointment time is within the allowed range
             if appointment_time < timezone.datetime.strptime('06:00', '%H:%M').time() or \

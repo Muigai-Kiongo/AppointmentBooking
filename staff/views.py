@@ -61,16 +61,16 @@ def appointment_type_edit(request, pk):
     return render(request, 'appointments/create_appointment_type.html', {'form': form})
 
 def appointment_detail(request, id):
-    # Retrieve the book object or return a 404 error if not found
-    appintment = get_object_or_404(Appointment, id=id)
+    # Fetch the appointment using the primary key (id)
+    appointment = get_object_or_404(Appointment, id=id)
     
-    # Create a context dictionary to pass the book details to the template
+    # Prepare the context to pass to the template
     context = {
-        'Appointment': Appointment,
+        'appointment': appointment,
     }
     
-    # Render the template with the context
-    return render(request, 'appointment_detail.html', context)
+    # Render the appointment detail template
+    return render(request, 'appointments/appointment_detail.html', context)
 
 
 def doctor_list(request):

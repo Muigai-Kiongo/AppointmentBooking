@@ -2,42 +2,514 @@
 {% load static %}
 
 {% block content %}
-<div>
+<div class="container appointment-booking">
     <h1>Book an Appointment</h1>
-    <form id="appointmentForm" method="post">
+    <form id="appointmentForm" method="post" class="appointment-flow">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" id="bookAppointmentButton">Book Appointment</button>
-    </form>
-    {% for message in messages %}
-        <script>
-            alert("{{ message }}");
-        </script>
-    {% endfor %}
-</div>
-<button id="payHereButton">Pay Here</button>
 
-<!-- Payment Iframe -->
-<div id="paymentContainer" style="display:none; margin-top:20px;">
-    <h2>Payment</h2>
-    <iframe id="paymentIframe" name="paymentIframe" style="width:100%; height:400px; border:none;"></iframe>
+        <!-- Step 1: Appointment Type -->
+        <div class="booking-step active" id="step-type">
+            <h2>Select Appointment Type</h2>
+            <div class="appointment-types">
+                {% for type in appointment_types %}
+                <div class="appointment-type-card" data-type-id="{{ type.id }}">
+                    <h3>{{ type.name }}</h3>
+                    <p>Duration: {{ type.duration }} minutes</p>
+                    <button type="button" class="select-type-btn">Select</button>
+                </div>
+                {% endfor %}
+            </div>
+            <input type="hidden" id="appointment_type" name="appointment_type" required>
+        </div>
+
+        <!-- Step 2: Available Doctors -->
+        <div class="booking-step" id="step-doctor">
+            <h2>Select Doctor</h2>
+            <div class="doctor-grid" id="doctor-container">
+                <!-- Doctors will be populated dynamically via JS -->
+            </div>
+            <input type="hidden" id="doctor" name="doctor" required>
+            <div class="step-controls">
+                <button type="button" class="back-btn">Back</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Available Dates -->
+        <div class="booking-step" id="step-date">
+            <h2>Select Date</h2>
+            <div class="date-slider" id="date-container">
+                <!-- Dates will be populated dynamically via JS -->
+            </div>
+            <input type="hidden" id="appointment_date" name="appointment_date" required>
+            <div class="step-controls">
+                <button type="button" class="back-btn">Back</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Available Times -->
+        <div class="booking-step" id="step-time">
+            <h2>Select Time</h2>
+            <div class="time-grid" id="time-container">
+                <!-- Times will be populated dynamically via JS -->
+            </div>
+            <input type="hidden" id="appointment_time" name="appointment_time" required>
+            <div class="step-controls">
+                <button type="button" class="back-btn">Back</button>
+            </div>
+        </div>
+
+        <!-- Confirmation Step -->
+        <div class="booking-step" id="step-confirm">
+            <h2>Confirm Appointment</h2>
+            <div class="appointment-summary">
+                <div class="summary-item">
+                    <strong>Type:</strong>
+                    <span id="summary-type"></span>
+                </div>
+                <div class="summary-item">
+                    <strong>Doctor:</strong>
+                    <span id="summary-doctor"></span>
+                </div>
+                <div class="summary-item">
+                    <strong>Date:</strong>
+                    <span id="summary-date"></span>
+                </div>
+                <div class="summary-item">
+                    <strong>Time:</strong>
+                    <span id="summary-time"></span>
+                </div>
+            </div>
+            <div class="step-controls">
+                <button type="button" class="back-btn">Back</button>
+                <button type="submit" class="confirm-btn">Confirm Booking</button>
+            </div>
+        </div>
+
+        <div class="progress-indicator">
+            <div class="progress-step active" data-step="type"></div>
+            <div class="progress-step" data-step="doctor"></div>
+            <div class="progress-step" data-step="date"></div>
+            <div class="progress-step" data-step="time"></div>
+            <div class="progress-step" data-step="confirm"></div>
+        </div>
+    </form>
 </div>
+
+<style>
+    .appointment-booking {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .booking-step {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .booking-step.active {
+        display: block;
+    }
+
+    .appointment-types {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .appointment-type-card {
+        border: 1px solid #e1e1e1;
+        padding: 1.5rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .appointment-type-card:hover {
+        border-color: #4a6bff;
+        box-shadow: 0 2px 8px rgba(74, 107, 255, 0.2);
+    }
+
+    .appointment-type-card h3 {
+        margin: 0 0 0.5rem 0;
+        color: #2c3e50;
+    }
+
+    .select-type-btn {
+        background: #4a6bff;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: background 0.2s;
+    }
+
+    .select-type-btn:hover {
+        background: #3a5bef;
+    }
+
+    .doctor-grid,
+    .time-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .date-slider {
+        display: flex;
+        overflow-x: auto;
+        gap: 1rem;
+        padding: 1rem 0;
+    }
+
+    .doctor-card,
+    .date-card,
+    .time-slot {
+        border: 1px solid #e1e1e1;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .doctor-card:hover,
+    .date-card:hover,
+    .time-slot:hover,
+    .doctor-card.selected,
+    .date-card.selected,
+    .time-slot.selected {
+        border-color: #4a6bff;
+        background: #f5f8ff;
+    }
+
+    .doctor-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        background: #e1e1e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        background-color: #4a6bff;
+    }
+
+    .step-controls {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+
+    .back-btn,
+    .confirm-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .back-btn {
+        background: none;
+        border: 1px solid #e1e1e1;
+    }
+
+    .confirm-btn {
+        background: #4a6bff;
+        color: white;
+        border: none;
+    }
+
+    .progress-indicator {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e1e1e1;
+    }
+
+    .progress-step {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #e1e1e1;
+        position: relative;
+    }
+
+    .progress-step.active {
+        background: #4a6bff;
+    }
+
+    .progress-step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        width: 2rem;
+        height: 2px;
+        background: #e1e1e1;
+        left: 20px;
+        top: 9px;
+    }
+
+    .progress-step.active:not(:last-child)::after {
+        background: #4a6bff;
+    }
+
+    .appointment-summary {
+        background: #f9fafc;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+    }
+
+    .summary-item {
+        margin-bottom: 1rem;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
 
 <script>
-    document.getElementById('payHereButton').onclick = function() {
-        // Show the payment iframe container
-        document.getElementById('paymentContainer').style.display = 'block';
-        
-        // Set the iframe src to the payment URL
-        document.getElementById('paymentIframe').src = 'http://tinypesa.com/AppointmentBooking';
-        
-        // Optionally, submit the form here if needed
-        // document.getElementById('appointmentForm').submit();
-    };
+    // Global variables to store selection state
+    let selectedType = null;
+    let selectedDoctor = null;
+    let selectedDate = null;
+    let selectedTime = null;
 
-    document.getElementById('appointmentForm').onsubmit = function() {
-        // You can handle form submission logic here if needed
-        // For example, you might want to prevent default submission if you're handling it with AJAX
-    };
+    // Initialize event listeners
+    document.addEventListener('DOMContentLoaded', function () {
+        // Appointment type selection
+        document.querySelectorAll('.appointment-type-card').forEach(card => {
+            card.addEventListener('click', function () {
+                const typeId = this.dataset.typeId;
+                const typeName = this.querySelector('h3').textContent;
+                selectedType = typeId;
+
+                // Hide all steps and show doctor selection
+                hideAllSteps();
+                document.getElementById('step-doctor').classList.add('active');
+                updateProgress('doctor');
+
+                // Fetch available doctors
+                fetch(`/get_available_doctors/${typeId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const container = document.getElementById('doctor-container');
+                        container.innerHTML = '';
+
+                        if (data.doctors && data.doctors.length > 0) {
+                            data.doctors.forEach(doctor => {
+                                const card = createDoctorCard(doctor);
+                                container.appendChild(card);
+                            });
+                        } else {
+                            container.innerHTML = '<p class="no-options">No doctors available for this appointment type.</p>';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+
+                document.getElementById('appointment_type').value = typeId;
+            });
+        });
+    });
+
+    // Doctor selection handler (delegated event)
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('.doctor-card')) {
+            const card = e.target.closest('.doctor-card');
+            selectedDoctor = card.dataset.doctorId;
+
+            // Clear previous selections
+            document.querySelectorAll('.doctor-card').forEach(el => el.classList.remove('selected'));
+            card.classList.add('selected');
+
+            // Hide all steps and show date selection
+            hideAllSteps();
+            document.getElementById('step-date').classList.add('active');
+            updateProgress('date');
+
+            // Get available dates (for simplicity, showing next 14 days)
+            populateAvailableDates();
+            document.getElementById('doctor').value = selectedDoctor;
+        }
+
+        // Date selection handler
+        else if (e.target.closest('.date-card')) {
+            const card = e.target.closest('.date-card');
+            selectedDate = card.dataset.date;
+
+            // Clear previous selections
+            document.querySelectorAll('.date-card').forEach(el => el.classList.remove('selected'));
+            card.classList.add('selected');
+
+            // Hide all steps and show time selection
+            hideAllSteps();
+            document.getElementById('step-time').classList.add('active');
+            updateProgress('time');
+
+            // Fetch available times for this doctor+date
+            fetch(`/get_available_times/${selectedDoctor}/?appointment_date=${selectedDate}&appointment_type_id=${selectedType}`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('time-container');
+                    container.innerHTML = '';
+
+                    if (data.times && data.times.length > 0) {
+                        data.times.forEach(time => {
+                            const slot = createTimeSlot(time);
+                            container.appendChild(slot);
+                        });
+                    } else {
+                        container.innerHTML = '<p class="no-options">No available time slots for this doctor on the selected date.</p>';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+
+            document.getElementById('appointment_date').value = selectedDate;
+        }
+
+        // Time selection handler
+        else if (e.target.closest('.time-slot')) {
+            const slot = e.target.closest('.time-slot');
+            selectedTime = slot.dataset.time;
+
+            // Clear previous selections
+            document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+            slot.classList.add('selected');
+
+            // Update summary and show confirmation
+            updateAppointmentSummary();
+            hideAllSteps();
+            document.getElementById('step-confirm').classList.add('active');
+            updateProgress('confirm');
+
+            document.getElementById('appointment_time').value = selectedTime;
+        }
+
+        // Back button handler
+        else if (e.target.closest('.back-btn')) {
+            const currentStep = document.querySelector('.booking-step.active').id;
+
+            if (currentStep === 'step-doctor') {
+                hideAllSteps();
+                document.getElementById('step-type').classList.add('active');
+                updateProgress('type');
+            }
+            else if (currentStep === 'step-date') {
+                hideAllSteps();
+                document.getElementById('step-doctor').classList.add('active');
+                updateProgress('doctor');
+            }
+            else if (currentStep === 'step-time') {
+                hideAllSteps();
+                document.getElementById('step-date').classList.add('active');
+                updateProgress('date');
+            }
+            else if (currentStep === 'step-confirm') {
+                hideAllSteps();
+                document.getElementById('step-time').classList.add('active');
+                updateProgress('time');
+            }
+        }
+    });
+
+    // Helper functions
+    function hideAllSteps() {
+        document.querySelectorAll('.booking-step').forEach(step => {
+            step.classList.remove('active');
+        });
+    }
+
+    function updateProgress(currentStep) {
+        document.querySelectorAll('.progress-step').forEach(step => {
+            step.classList.remove('active');
+
+            if (step.dataset.step === currentStep ||
+                (currentStep === 'doctor' && step.dataset.step === 'type') ||
+                (currentStep === 'date' && (step.dataset.step === 'type' || step.dataset.step === 'doctor')) ||
+                (currentStep === 'time' && (step.dataset.step !== 'confirm')) ||
+                currentStep === 'confirm'
+            ) {
+                step.classList.add('active');
+            }
+        });
+    }
+
+    function createDoctorCard(doctor) {
+        const card = document.createElement('div');
+        card.className = 'doctor-card';
+        card.dataset.doctorId = doctor.id;
+
+        card.innerHTML = `
+            <div class="doctor-avatar">${doctor.name.charAt(0)}</div>
+            <h3>${doctor.name}</h3>
+            <p>Specialty: ${doctor.specialty}</p>
+        `;
+
+        return card;
+    }
+
+    function populateAvailableDates() {
+        const container = document.getElementById('date-container');
+        container.innerHTML = '';
+
+        // Generate next 14 days
+        const today = new Date();
+        const dateFormat = new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+        for (let i = 0; i < 14; i++) {
+            const dateObj = new Date(today);
+            dateObj.setDate(today.getDate() + i);
+
+            const dateCard = document.createElement('div');
+            dateCard.className = 'date-card';
+            dateCard.dataset.date = dateObj.toISOString().split('T')[0];
+
+            dateCard.innerHTML = `
+                <div>${dateFormat.format(dateObj)}</div>
+            `;
+
+            container.appendChild(dateCard);
+        }
+    }
+
+    function createTimeSlot(time) {
+        const slot = document.createElement('div');
+        slot.className = 'time-slot';
+        slot.dataset.time = time;
+
+        slot.textContent = time;
+
+        return slot;
+    }
+
+    function updateAppointmentSummary() {
+        document.getElementById('summary-type').textContent = document.querySelector(`.appointment-type-card[data-type-id="${selectedType}"] h3`).textContent;
+        document.getElementById('summary-doctor').textContent = document.querySelector(`.doctor-card[data-doctor-id="${selectedDoctor}"] h3`).textContent;
+
+        const dateCard = document.querySelector(`.date-card[data-date="${selectedDate}"]`);
+        const dateStr = dateCard.textContent.trim();
+        document.getElementById('summary-date').textContent = dateStr;
+
+        document.getElementById('summary-time').textContent = selectedTime;
+    }
 </script>
 {% endblock %}

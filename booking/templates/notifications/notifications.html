@@ -1,14 +1,14 @@
 {%extends 'index.html'%}
 {%load static%}
 {%block content%}
-<div>
+<div class="container">
     <h1>Notifications</h1>
     <ul>
         {%if notifications%}
         {% for notification in notifications %}
-            <li>
-                {{ notification.message }} - {% if notification.is_read %}Read{% else %}Unread{% endif %}
-            </li>
+        <li>
+            {{ notification.message }} - {% if notification.is_read %}Read{% else %}Unread{% endif %}
+        </li>
         {% endfor %}
         {%else%}
         <p>No Notifications at the Moment </p>

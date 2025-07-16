@@ -1,136 +1,320 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Your health management platform for booking appointments and accessing health tips." />
+    <meta name="description"
+        content="Your health management platform for booking appointments and accessing health tips." />
     <title>{{ title }}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     <style>
         header {
-            background-color: #233142; /* Dark background for the header */
-            padding: 10px 20px; /* Padding around the header */
-            color: white; /* Text color */
-            display: flex; /* Use flexbox for layout */
-            justify-content: flex-end; /* Space between items */
-            align-items: center; /* Center items vertically */
+            background-color: #233142;
+            /* Dark background for the header */
+            padding: 10px 20px;
+            /* Padding around the header */
+            color: white;
+            /* Text color */
+            display: flex;
+            /* Use flexbox for layout */
+            justify-content: flex-end;
+            /* Space between items */
+            align-items: center;
+            /* Center items vertically */
+        }
 
-        }
-    
         nav {
-            display: flex; /* Use flexbox for navigation items */
-            align-items: center; /* Center items vertically */
+            display: flex;
+            /* Use flexbox for navigation items */
+            align-items: center;
+            /* Center items vertically */
         }
-    
+
         h3 {
-            margin: 0; /* Remove default margin */
-            font-size: 20px; /* Font size for username */
+            margin: 0;
+            /* Remove default margin */
+            font-size: 20px;
+            /* Font size for username */
         }
-    
+
         .login {
-            margin-left: 20px; /* Space between username and login link */
-            padding: 10px 15px; /* Padding for the login button */
-            background-color: #007bff; /* Primary button color */
-            color: white; /* Text color */
-            border-radius: 5px; /* Rounded corners */
-            text-decoration: none; /* Remove underline */
-            transition: background-color 0.3s; /* Smooth transition for hover effect */
+            margin-left: 20px;
+            /* Space between username and login link */
+            padding: 10px 15px;
+            /* Padding for the login button */
+            background-color: #007bff;
+            /* Primary button color */
+            color: white;
+            /* Text color */
+            border-radius: 5px;
+            /* Rounded corners */
+            text-decoration: none;
+            /* Remove underline */
+            transition: background-color 0.3s;
+            /* Smooth transition for hover effect */
         }
-    
+
         .login:hover {
-            background-color: #0056b3; /* Darker shade on hover */
+            background-color: #0056b3;
+            /* Darker shade on hover */
         }
-    
+
         .logout-button {
-            margin-left: 20px; /* Space between username and logout button */
-            padding: 10px 15px; /* Padding for the logout button */
-            background-color: #dc3545; /* Danger button color */
-            color: white; /* Text color */
-            border: none; /* Remove border */
-            border-radius: 5px; /* Rounded corners */
-            cursor: pointer; /* Pointer cursor on hover */
-            transition: background-color 0.3s; /* Smooth transition for hover effect */
+            margin-left: 20px;
+            /* Space between username and logout button */
+            padding: 10px 15px;
+            /* Padding for the logout button */
+            background-color: #dc3545;
+            /* Danger button color */
+            color: white;
+            /* Text color */
+            border: none;
+            /* Remove border */
+            border-radius: 5px;
+            /* Rounded corners */
+            cursor: pointer;
+            /* Pointer cursor on hover */
+            transition: background-color 0.3s;
+            /* Smooth transition for hover effect */
         }
-    
+
         .logout-button:hover {
-            background-color: #c82333; /* Darker shade on hover */
+            background-color: #c82333;
+            /* Darker shade on hover */
         }
+
+        .body-content {
+            display: flex;
+            /* Use flexbox for body content */
+        }
+
+        .container {
+            flex: 1;
+            /* Allow container to take up available space */
+            padding: 20px;
+            /* Padding for the container */
+        }
+
+        .welcome-header {
+            margin-bottom: 20px;
+            /* Space below the welcome header */
+            font-size: 24px;
+            /* Font size for the welcome message */
+            color: #333;
+            /* Darker color for better visibility */
+        }
+
+        .dashboard-container {
+            display: flex;
+            /* Use flexbox for dashboard and appointments */
+            justify-content: space-between;
+            /* Space between dashboard and appointments */
+            align-items: flex-start;
+            /* Align items at the start */
+            margin-bottom: 20px;
+            /* Space below the dashboard */
+        }
+
+        .dashboard {
+            display: flex;
+            /* Use flexbox for dashboard buttons */
+            flex-wrap: wrap;
+            /* Allow buttons to wrap */
+            gap: 20px;
+            /* Space between buttons */
+        }
+
+        .dashboard-button {
+            display: flex;
+            /* Flexbox for button layout */
+            align-items: center;
+            /* Center items vertically */
+            padding: 15px;
+            /* Padding for the button */
+            background-color: #007bff;
+            /* Primary button color */
+            color: white;
+            /* Text color */
+            border-radius: 5px;
+            /* Rounded corners */
+            text-decoration: none;
+            /* Remove underline */
+            transition: background-color 0.3s;
+            /* Smooth transition for hover effect */
+            flex: 1;
+            /* Allow buttons to grow */
+            max-width: 150px;
+            /* Max width for buttons */
+        }
+
+        .dashboard-button:hover {
+            background-color: #0056b3;
+            /* Darker shade on hover */
+        }
+
+        .upcoming-appointments {
+            flex: 0 0 300px;
+            /* Fixed width for upcoming appointments */
+            margin-left: 20px;
+            /* Space between dashboard and upcoming appointments */
+        }
+
         p {
-            color: #666; /* Gray color for paragraph text */
-            font-size: 16px; /* Font size for paragraphs */
+            color: #666;
+            /* Gray color for paragraph text */
+            font-size: 16px;
+            /* Font size for paragraphs */
         }
 
         .bookBtn {
-            display: inline-block; /* Make the link a block element */
-            padding: 10px 20px; /* Padding for the button */
-            background-color: #007bff; /* Primary button color */
-            color: white; /* Text color */
-            text-decoration: none; /* Remove underline */
-            border-radius: 5px; /* Rounded corners */
-            transition: background-color 0.3s; /* Smooth transition for hover effect */
+            display: inline-block;
+            /* Make the link a block element */
+            padding: 10px 20px;
+            /* Padding for the button */
+            background-color: #007bff;
+            /* Primary button color */
+            color: white;
+            /* Text color */
+            text-decoration: none;
+            /* Remove underline */
+            border-radius: 5px;
+            /* Rounded corners */
+            transition: background-color 0.3s;
+            /* Smooth transition for hover effect */
         }
 
         .bookBtn:hover {
-            background-color: #0056b3; /* Darker shade on hover */
+            background-color: #0056b3;
+            /* Darker shade on hover */
         }
 
         /* Responsive design */
         @media (max-width: 600px) {
             .bookBtn {
-                width: 100%; /* Full width on small screens */
-                text-align: center; /* Center text */
+                width: 100%;
+                /* Full width on small screens */
+                text-align: center;
+                /* Center text */
+            }
+
+            .dashboard-button {
+                flex: 1 1 100%;
+                /* Full width for buttons on small screens */
+                max-width: none;
+                /* Remove max width */
+            }
+
+            .upcoming-appointments {
+                margin-left: 0;
+                /* Remove margin on small screens */
+                margin-top: 20px;
+                /* Add space above */
             }
         }
     </style>
 </head>
+
 <body>
     <header>
         <nav>
-        {% if user.is_authenticated %}
-        <h3>{{user.username}}</h3>
-        {% csrf_token %}
-        <form method="post" action="{% url 'logout' %}">
+            {% if user.is_authenticated %}
+            <h3>{{user.username}}</h3>
             {% csrf_token %}
-            <button type="submit" class="logout-button">Logout</button>
-        </form>
-        {% else %}
-        <a href="/accounts/login" class="login" style='text-decoration:none; color:white;'>Login</a>
-        {% endif %}
-    </nav>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">Logout</button>
+            </form>
+            {% else %}
+            <a href="/accounts/login" class="login" style='text-decoration:none; color:white;'>Login</a>
+            {% endif %}
+        </nav>
     </header>
 
     <div class='body-content'>
         {% include 'components/aside.html' %}
-
+        {% block content %}
         <div class="container">
-            {% block content %}
-            <section>
-                <h2>Upcoming Appointments</h2>
-                <div>
-                    {% if upcoming_bookings %}
+            <h2 class="welcome-header">Welcome back, {{ user.username }}!</h2>
+            <div class="dashboard-container">
+                <section class="dashboard">
+                    <a href="/book_appointment/" class="dashboard-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                            class="bi bi-book" viewBox="0 0 16 16">
+                            <path
+                                d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.527 1.016a.5.5 0 0 1 .732.732A7.002 7.002 0 0 1 1 8.5V2.828zM1 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H1a1 1 0 0 1-1-1V1a1 1 0 0 1 1-1z" />
+                        </svg>
+                        Book Here
+                    </a>
+                    <a href="/appointments" class="dashboard-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                            class="bi bi-calendar" viewBox="0 0 16 16">
+                            <path
+                                d="M3.5 0a.5.5 0 0 1 .5.5V1h9V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H1a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z" />
+                        </svg>
+                        My Appointments
+                    </a>
+                    <a href="/notifications/" class="dashboard-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                            class="bi bi-bell" viewBox="0 0 16 16">
+                            <path
+                                d="M8 16a2 2 0 1 0 2-2H6a2 2 0 0 0 2 2zm1-2a1 1 0 1 1-2 0h2zM4.5 1a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v1h-7V1zM1 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v1H0V4h1zm0 2h14v10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6z" />
+                        </svg>
+                        Notifications
+                    </a>
+                    <a href="/reports/" class="dashboard-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                            class="bi bi-file-earmark-text" viewBox="0 0 16 16">
+                            <path
+                                d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V5.707L9.293 0zM8 1.5L12.5 6H8V1.5zM4 2h4v4h4v10H4V2z" />
+                        </svg>
+                        Health Reports
+                    </a>
+                    <a href="/doctors/" class="dashboard-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                            class="bi bi-person" viewBox="0 0 16 16">
+                            <path d="M8 0a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 10a6 6 0 0 0-6 6v1h12v-1a6 6 0 0 0-6-6z" />
+                        </svg>
+                        Doctors
+                    </a>
+                    <a href="/accounts/profile/" class="dashboard-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                            class="bi bi-person-circle" viewBox="0 0 16 16">
+                            <path
+                                d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm0 1a7 7 0 1 1 0 14A7 7 0 0 1 8 1zm0 10.5a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11z" />
+                        </svg>
+                        Profile
+                    </a>
+                </section>
+
+                <section class="upcoming-appointments">
+                    <h2>Upcoming Appointments</h2>
+                    <div>
+                        {% if upcoming_bookings %}
                         <ul>
                             {% for booking in upcoming_bookings %}
-                                <li>{{ booking.appointment_date }} - {{ booking.description }}</li>
+                            <li>{{ booking.appointment_date }} - {{ booking.description }}</li>
                             {% endfor %}
                         </ul>
-                    {% else %}
+                        {% else %}
                         <p>No upcoming appointments.</p>
-                    {% endif %}
-                </div>
-            </section>
+                        {% endif %}
+                    </div>
+                </section>
+            </div>
 
             <section>
                 <h2>Health Tips</h2>
                 <div>
                     {% if health_tips %}
-                        <ul>
-                            {% for tip in health_tips %}
-                                <li>{{ tip.content }}</li>  <!-- Assuming 'content' is a field in HealthTip model -->
-                            {% endfor %}
-                        </ul>
+                    <ul>
+                        {% for tip in health_tips %}
+                        <li>{{ tip.content }}</li> <!-- Assuming 'content' is a field in HealthTip model -->
+                        {% endfor %}
+                    </ul>
                     {% else %}
-                        <p>No health tips available at the moment.</p>
+                    <p>No health tips available at the moment.</p>
                     {% endif %}
                 </div>
             </section>
@@ -139,8 +323,9 @@
                 <p>Make an Appointment Here</p>
                 <a href="/book_appointment/" aria-label="Book an appointment" class='bookBtn'>Book Here</a>
             </div>
-            {% endblock %}
         </div>
+        {% endblock %}
     </div>
 </body>
+
 </html>

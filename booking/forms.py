@@ -1,29 +1,22 @@
 from django import forms
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.core.exceptions import ValidationError
-from .models import UserProfile, Doctor, AppointmentType,Appointment, HealthRecord, Notification, Payment
+from .models import UserProfile, Doctor, AppointmentType, Appointment, HealthRecord, Notification, Payment
 from django.contrib.auth.models import User
-
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['phone_number', 'address', 'date_of_birth', 'insurance_provider', 'insurance_policy_number']
 
-
 class DoctorForm(forms.ModelForm):
-    # Dropdown for selecting existing users
     user = forms.ModelChoiceField(
         queryset=User .objects.all(),
         required=True,
         label='Select User'
     )
 
-    # Remove the password field
-    # password = forms.CharField(widget=forms.PasswordInput, required=True, label='Password')
-
-    # Time choices for available time start and end
     TIME_CHOICES = [(f"{hour:02d}:{minute:02d}", f"{hour:02d}:{minute:02d}") for hour in range(24) for minute in (0, 15, 30, 45)]
 
     available_time_start = forms.ChoiceField(choices=TIME_CHOICES, required=True, label='Available Time Start')
@@ -32,14 +25,15 @@ class DoctorForm(forms.ModelForm):
     class Meta:
         model = Doctor
         fields = [
-            'user',  # Include the user dropdown
+            'user',
             'specialty',
             'qualifications',
             'experience_years',
             'languages_spoken',
             'available_days',
             'available_time_start',
-            'available_time_end'
+            'available_time_end',
+            'appointment_types'
         ]
 
 class AppointmentTypeForm(forms.ModelForm):
@@ -47,29 +41,13 @@ class AppointmentTypeForm(forms.ModelForm):
         model = AppointmentType
         fields = ['name', 'duration']
 
-
-
 class AppointmentForm(forms.ModelForm):
     class Meta:
         model = Appointment
         fields = ['doctor', 'appointment_type', 'appointment_date', 'appointment_time']
         widgets = {
-            'doctor': forms.Select(attrs={
-                'placeholder': 'Select Doctor',
-            }),
-            'appointment_type': forms.Select(attrs={
-                'placeholder': 'Select Appointment Type',
-            }),
-            'appointment_date': forms.DateInput(attrs={
-                'type': 'date',
-                'placeholder': 'Select Appointment Date',
-            }),
-            'appointment_time': forms.TimeInput(attrs={
-                'type': 'time',
-                'placeholder': 'Select Appointment Time',
-                'min': '06:00',  # Set minimum time to 6 AM
-                'max': '20:00',  # Set maximum time to 8 PM
-            }),
+            'doctor': forms.Select(attrs={'placeholder': 'Select Doctor'}),
+            'appointment_type': forms.Select(attrs={'placeholder': 'Select Appointment Type'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -79,68 +57,53 @@ class AppointmentForm(forms.ModelForm):
                 'required': 'This field is required.',
                 'invalid': 'Please enter a valid value.',
             }
-            field.widget.attrs.update({'class': 'form-control'})  # Add a default class for styling
+            field.widget.attrs.update({'class': 'form-control'})
 
     def clean(self):
         cleaned_data = super().clean()
         doctor = cleaned_data.get('doctor')
         appointment_date = cleaned_data.get('appointment_date')
         appointment_time = cleaned_data.get('appointment_time')
+        appointment_type = cleaned_data.get('appointment_type')
 
-        if doctor and appointment_date and appointment_time:
-            # Combine date and time into a single datetime object
-            appointment_datetime = timezone.datetime.combine(appointment_date, appointment_time)
+        if doctor and appointment_date and appointment_time and appointment_type:
+            appointment_datetime = datetime.combine(appointment_date, appointment_time)
 
-
-            if appointment_date and appointment_date < timezone.now().date():
+            if appointment_date < timezone.now().date():
                 raise ValidationError("You cannot book an appointment for a past date.")
 
+            if not (doctor.available_time_start <= appointment_time <= doctor.available_time_end):
+                raise ValidationError(f"Doctor is only available between {doctor.available_time_start.strftime('%I:%M %p')} and {doctor.available_time_end.strftime('%I:%M %p')}.")
 
-            # Check if the appointment time is within the allowed range
-            if appointment_time < timezone.datetime.strptime('06:00', '%H:%M').time() or \
-               appointment_time > timezone.datetime.strptime('20:00', '%H:%M').time():
-                raise ValidationError("Appointment time must be between 6 AM and 8 PM.")
+            if appointment_type not in doctor.appointment_types.all():
+                raise ValidationError(f"This doctor does not offer '{appointment_type.name}' appointments.")
 
-            # Check for existing appointments for the same doctor at the same time
+            proposed_start_datetime = datetime.combine(appointment_date, appointment_time)
+            proposed_end_datetime = proposed_start_datetime + timedelta(minutes=appointment_type.duration)
+
             existing_appointments = Appointment.objects.filter(
                 doctor=doctor,
-                appointment_date=appointment_date,
-                appointment_time=appointment_time
+                appointment_date=appointment_date
             )
 
-            if existing_appointments.exists():
-                raise ValidationError("This doctor is already booked at this time.")
+            for existing_appt in existing_appointments:
+                existing_start_datetime = datetime.combine(existing_appt.appointment_date, existing_appt.appointment_time)
+                existing_end_datetime = existing_start_datetime + timedelta(minutes=existing_appt.appointment_type.duration)
 
-            # Check for appointments within one hour before or after the requested time
-            one_hour_before = appointment_datetime - timedelta(hours=1)
-            one_hour_after = appointment_datetime + timedelta(hours=1)
-
-            conflicting_appointments = Appointment.objects.filter(
-                doctor=doctor,
-                appointment_date=appointment_date,
-                appointment_time__range=(one_hour_before.time(), one_hour_after.time())
-            )
-
-            if conflicting_appointments.exists():
-                raise ValidationError("This doctor is booked within one hour of the requested time.")
+                if (proposed_start_datetime < existing_end_datetime and proposed_end_datetime > existing_start_datetime):
+                    raise ValidationError("This doctor is already booked at this time or there is an overlap with another appointment.")
 
         return cleaned_data
-
 
 class HealthRecordForm(forms.ModelForm):
     class Meta:
         model = HealthRecord
         fields = ['record_date', 'description']
 
-
-
-
 class NotificationForm(forms.ModelForm):
     class Meta:
         model = Notification
         fields = ['message']
-
-
 
 class PaymentForm(forms.ModelForm):
     class Meta:

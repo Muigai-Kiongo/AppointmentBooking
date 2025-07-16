@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Doctor,Appointment, AppointmentType, Doctor, Notification
+from .models import Doctor, Appointment, AppointmentType, Notification
 from .forms import AppointmentForm, ReportForm
 from django.urls import reverse_lazy
-from datetime import datetime
+from datetime import datetime, time, timedelta
 from django.utils import timezone
 from django.template.loader import render_to_string
 from weasyprint import HTML
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
 
@@ -16,15 +16,12 @@ current_date = datetime.now().date()
 
 @login_required
 def index(request):
-    upcoming_bookings = Appointment.objects.filter(user=request.user ,appointment_date=current_date)
-    context= {
-    'title':'Home',
-    'upcoming_bookings': upcoming_bookings,
-
+    upcoming_bookings = Appointment.objects.filter(user=request.user, appointment_date=current_date)
+    context = {
+        'title': 'Home',
+        'upcoming_bookings': upcoming_bookings,
     }
-
     return render(request, 'index.html', context)
-
 
 @login_required
 def appointmentBooking(request):
@@ -54,18 +51,17 @@ def appointmentBooking(request):
             recipient_list = [request.user.email]
 
             send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
-            messages.success(request, 'Appointment successfully scheduled! Pay Booking  Fee( 200/-) to secure your Apointment')
+            messages.success(request, 'Appointment successfully scheduled! Pay Booking Fee (200/-) to secure your Appointment')
 
-            return redirect('appointmentBooking')  
+            return redirect('appointmentBooking')
     else:
         form = AppointmentForm()
 
     context = {
-        'form': form
+        'form': form,
+        'appointment_types': AppointmentType.objects.all()  # Pass appointment types to the template
     }
     return render(request, 'appointment/appointment.html', context)
-
-
 
 def appointmentListView(request):
     current_datetime = timezone.now()  # Get the current date and time
@@ -97,7 +93,6 @@ def appointmentDetailView(request, pk):
     return render(request, "appointment/appointment_detail.html", context)
 
 def appointmentUpdateView(request, pk):
-
     booking = get_object_or_404(Appointment, pk=pk)
     if request.method == "POST":
         form = AppointmentForm(request.POST, instance=booking)
@@ -129,15 +124,11 @@ def appointmentDeleteView(request, pk):
         "title": "Delete Appointment",
         "booking": booking
     }
-    return render(request, "appointment/appointment_delete.htm", context)
-
-
+    return render(request, "appointment/appointment_delete.html", context)
 
 def list_doctors(request):
     doctors = Doctor.objects.all()
     return render(request, 'doctors/doctors_list.html', {'doctors': doctors})
-
-
 
 @login_required
 def view_notifications(request):
@@ -187,3 +178,83 @@ def download_report(request, report_type):
     appointments = get_appointments(report_type)
     html_string = render_to_string(f'reports/{report_type}_report.html', {'appointments': appointments})
     return generate_pdf_response(html_string, f'{report_type}_report.pdf')
+
+# New AJAX view to get available doctors based on appointment type
+def get_available_doctors(request, appointment_type_id):
+    # Filter doctors who are associated with the given appointment_type_id
+    doctors = Doctor.objects.filter(appointment_types__id=appointment_type_id)
+    doctor_list = [{'id': doctor.id, 'name': str(doctor)} for doctor in doctors]
+    return JsonResponse({'doctors': doctor_list})
+
+# New AJAX view to get available times for a selected doctor and date
+def get_available_times(request, doctor_id):
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+    selected_date_str = request.GET.get('appointment_date') # Get the selected date from the request
+    appointment_type_id = request.GET.get('appointment_type_id') # Get the selected appointment type ID
+
+    if not selected_date_str:
+        return JsonResponse({'times': [], 'error': 'Appointment date is required.'}, status=400)
+    if not appointment_type_id:
+        return JsonResponse({'times': [], 'error': 'Appointment type is required.'}, status=400)
+
+    try:
+        selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
+        appointment_type = AppointmentType.objects.get(id=appointment_type_id)
+    except (ValueError, AppointmentType.DoesNotExist):
+        return JsonResponse({'times': [], 'error': 'Invalid date or appointment type.'}, status=400)
+
+    available_times = []
+
+    # Check if the selected date is in the past
+    if selected_date < timezone.now().date():
+        return JsonResponse({'times': [], 'error': 'Cannot book appointments for past dates.'}, status=400)
+
+    # Convert doctor's available start and end times to datetime.time objects
+    start_time_doctor = doctor.available_time_start
+    end_time_doctor = doctor.available_time_end
+
+    # Get all existing appointments for this doctor on the selected date
+    booked_appointments = Appointment.objects.filter(
+        doctor=doctor,
+        appointment_date=selected_date
+    ).order_by('appointment_time')
+
+    # Generate potential time slots within the doctor's availability
+    # Start from the doctor's available start time
+    current_slot_datetime = datetime.combine(selected_date, start_time_doctor)
+    end_slot_datetime = datetime.combine(selected_date, end_time_doctor)
+
+    # Use the duration of the selected appointment type
+    appointment_duration = timedelta(minutes=appointment_type.duration)
+    time_slot_interval = timedelta(minutes=15) # Define a granular interval for checking slots, e.g., every 15 minutes
+
+    while current_slot_datetime + appointment_duration <= end_slot_datetime:
+        slot_start_time = current_slot_datetime.time()
+        slot_end_time = (current_slot_datetime + appointment_duration).time()
+
+        is_available = True
+
+        # Check if the slot is in the past relative to now
+        if selected_date == timezone.now().date() and slot_start_time < timezone.now().time():
+            is_available = False
+
+        if is_available:
+            for booked_appt in booked_appointments:
+                booked_start_datetime = datetime.combine(booked_appt.appointment_date, booked_appt.appointment_time)
+                booked_end_datetime = booked_start_datetime + timedelta(minutes=booked_appt.appointment_type.duration)
+
+                # Check for overlap: (StartA < EndB and EndA > StartB)
+                # Convert proposed slot times to datetime objects for comparison
+                proposed_slot_start_datetime = datetime.combine(selected_date, slot_start_time)
+                proposed_slot_end_datetime = datetime.combine(selected_date, slot_end_time)
+
+                if (proposed_slot_start_datetime < booked_end_datetime and proposed_slot_end_datetime > booked_start_datetime):
+                    is_available = False
+                    break
+
+        if is_available:
+            available_times.append(slot_start_time.strftime('%H:%M'))
+
+        current_slot_datetime += time_slot_interval # Move to the next granular interval
+
+    return JsonResponse({'times': available_times})

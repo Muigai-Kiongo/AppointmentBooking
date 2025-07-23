@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <header>
+        <h1>Health Plus +</h1>
+        <nav>
+            {% if user.is_authenticated %}
+            <h3>{{user.username}}</h3>
+            {% csrf_token %}
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">Logout</button>
+            </form>
+            {% else %}
+            <a href="/accounts/login" class="login" style='text-decoration:none; color:white;'>Login</a>
+            {% endif %}
+        </nav>
+    </header>
+    <div class="container">
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="hero-title">
+                Welcome
+                {% if user.is_authenticated %}
+                {{ user.username }}!
+                {% else %}
+                to the Booking App!
+                {% endif %}
+            </h1>
+            <p class="hero-subtitle">Welcome to the Health Plus Appointment Booking System!</p>
+            <p class="hero-description">Our platform is designed to simplify your healthcare experience. With just a few
+                clicks, you can:</p>
+            <ul class="hero-list">
+                <li>Book appointments with qualified doctors</li>
+                <li>View and manage your upcoming appointments</li>
+                <li>Access valuable health tips tailored for you</li>
+            </ul>
+
+            {% if user.is_authenticated %}
+            <p class="hero-message">You're all set to explore your personalized dashboard, manage your appointments, and
+                discover health tips that matter to you.</p>
+            <a href="/dashboard" class="btn">Go to Dashboard</a>
+            {% else %}
+            <p class="hero-message">Join our community to take control of your health! Sign in or create an account to
+                access your dashboard and manage your appointments.</p>
+            <p class="hero-steps">Getting started is easy:</p>
+            <a href="/accounts/login" class="btn">Sign In</a>
+            <a href="/accounts/signup" class="btn">Sign Up</a>
+            {% endif %}
+        </section>
+
+
+        <!-- Features Section -->
+        <section class="features-section">
+            <div class="features-header">
+                <h2 class="features-title">Why Choose HealthPlus?</h2>
+                <p class="features-description">
+                    We combine expert care with cutting-edge technology to give you the best healthcare experience.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <!-- Feature 1 -->
+                <div class="feature-card">
+                    <h3 class="feature-title">24/7 Appointment Booking</h3>
+                    <p class="feature-description">
+                        Schedule appointments anytime, anywhere with our easy-to-use platform. Get reminders and
+                        reschedule
+                        with just one click.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card">
+                    <h3 class="feature-title">Verified Professionals</h3>
+                    <p class="feature-description">
+                        All our healthcare providers are rigorously vetted to ensure you receive the highest quality
+                        care
+                        from trusted experts.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card">
+                    <h3 class="feature-title">Digital Health Records</h3>
+                    <p class="feature-description">
+                        Securely access your medical history, prescriptions, and test results all in one place through
+                        our
+                        encrypted platform.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- How It Works Section -->
+        <section class="how-it-works-section">
+            <div class="how-it-works-header">
+                <h2 class="how-it-works-title">How It Works</h2>
+                <p class="how-it-works-description">
+                    Getting healthcare has never been easier. Just follow these simple steps:
+                </p>
+            </div>
+
+            <div class="how-it-works-content">
+                <div class="how-it-works-steps">
+                    <!-- Step 1 -->
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-details">
+                            <h3 class="step-title">Create Your Profile</h3>
+                            <p class="step-description">
+                                Sign up in minutes and tell us about your health needs. Your information is kept secure
+                                and
+                                confidential.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-details">
+                            <h3 class="step-title">Find Your Specialist</h3>
+                            <p class="step-description">
+                                Browse our network of healthcare providers by specialty, availability, and patient
+                                reviews.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-details">
+                            <h3 class="step-title">Book Your Visit</h3>
+                            <p class="step-description">
+                                Select your preferred time slot and book instantly. Receive confirmation and reminders
+                                via
+                                email/SMS.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-details">
+                            <h3 class="step-title">Complete Your Visit</h3>
+                            <p class="step-description">
+                                Attend your appointment in-person or virtually. Access your visit summary and records
+                                afterward.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Testimonials Section -->
+        <section class="testimonials-section">
+            <div class="testimonials-header">
+                <h2 class="testimonials-title">What Our Patients Say</h2>
+                <p class="testimonials-description">
+                    Hear from people who transformed their health with our platform.
+                </p>
+            </div>
+
+            <div class="testimonials-grid">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card">
+                    <h4 class="testimonial-name">Jessica R.</h4>
+                    <p class="testimonial-role">Cardiology Patient</p>
+                    <p class="testimonial-quote">
+                        "Finding Dr. Johnson through HealthPlus was a lifesaver. The appointment booking was effortless,
+                        and
+                        the care I received was exceptional."
+                    </p>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card">
+                    <h4 class="testimonial-name">Marcus T.</h4>
+                    <p class="testimonial-role">Pediatrics Patient</p>
+                    <p class="testimonial-quote">
+                        "As a busy parent, HealthPlus has been a game-changer. I can book my kids' appointments during
+                        my
+                        commute and get reminders before each visit."
+                    </p>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card">
+                    <h4 class="testimonial-name">Sophia L.</h4>
+                    <p class="testimonial-role">Dermatology Patient</p>
+                    <p class="testimonial-quote">
+                        "After struggling with skin issues for years, Dr. Patel diagnosed and treated my condition
+                        perfectly. Highly recommend!"
+                    </p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Call to Action Section -->
+        <section class="cta-section">
+            <h2 class="cta-title">Ready to Take Control of Your Health?</h2>
+            <p class="cta-description">Join thousands of satisfied patients who simplified their healthcare
+                journey with HealthPlus.</p>
+            {% if user.is_authenticated %}
+            <a href="/dashboard" class="btn">Go to Dashboard</a>
+            {% else %}
+            <a href="/accounts/signup" class="btn">Get Started Free</a>
+            <a href="/accounts/login" class="btn">I Already Have an Account</a>
+            {% endif %}
+        </section>
+    </div>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+        }
+
+        header {
+            background-color: #233142;
+            /* Dark background for the header */
+            padding: 10px 20px;
+            /* Padding around the header */
+            color: white;
+            /* Text color */
+            display: flex;
+            /* Use flexbox for layout */
+            justify-content: space-between;
+            /* Space between items */
+            align-items: center;
+            /* Center items vertically */
+        }
+
+        nav {
+            display: flex;
+            /* Use flexbox for navigation items */
+            align-items: center;
+            /* Center items vertically */
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            padding: 5rem 0;
+            background-color: #e0f2ff;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero-description {
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-list {
+            list-style-type: disc;
+            margin: 0 auto;
+            padding: 0;
+            max-width: 600px;
+            text-align: left;
+        }
+
+        .hero-message {
+            margin-bottom: 1rem;
+        }
+
+        .hero-steps {
+            margin-bottom: 2rem;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 5rem 0;
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .features-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .features-description {
+            font-size: 1.2rem;
+            color: #555;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            color: #666;
+        }
+
+        /* How It Works Section */
+        .how-it-works-section {
+            padding: 5rem 0;
+            background-color: #f9f9f9;
+        }
+
+        .how-it-works-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .how-it-works-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .how-it-works-description {
+            font-size: 1.2rem;
+            color: #555;
+        }
+
+        .how-it-works-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .how-it-works-image {
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-number {
+            background-color: #007bff;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .step-description {
+            color: #666;
+        }
+
+        /* Testimonials Section */
+        .testimonials-section {
+            padding: 5rem 0;
+        }
+
+        .testimonials-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .testimonials-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .testimonials-description {
+            font-size: 1.2rem;
+            color: #555;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .testimonial-name {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .testimonial-role {
+            color: #999;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-quote {
+            font-style: italic;
+            color: #666;
+        }
+
+        /* Call to Action Section */
+        .cta-section {
+            padding: 5rem 0;
+            text-align: center;
+            background-color: #e0f2ff;
+        }
+
+        .cta-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .cta-description {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+    </style>
+
+</body>
+
+</html>

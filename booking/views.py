@@ -14,11 +14,22 @@ from django.contrib import messages
 
 current_date = datetime.now().date()
 
-@login_required
+
 def index(request):
-    upcoming_bookings = Appointment.objects.filter(user=request.user, appointment_date=current_date)
+    
     context = {
         'title': 'Home',
+        
+    }
+    return render(request, 'startup.html', context)
+
+
+
+@login_required
+def dashboard(request):
+    upcoming_bookings = Appointment.objects.filter(user=request.user, appointment_date=current_date)
+    context = {
+        'title': 'Dashboard',
         'upcoming_bookings': upcoming_bookings,
     }
     return render(request, 'index.html', context)

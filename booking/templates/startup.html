@@ -4,13 +4,499 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Health Plus</title>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        header {
+            background-color: #233142;
+            padding: 15px 30px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        .login,
+        .logout-button {
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-left: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .login {
+            background-color: #3c9;
+            color: white;
+        }
+
+        .logout-button {
+            background-color: #f05656;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            margin: 5px;
+            font-size: 0.95rem;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .btn.secondary {
+            background-color: #6c757d;
+        }
+
+        .btn.secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            padding: 5rem 0;
+            background: linear-gradient(135deg, #e0f2ff 0%, #f0f7ff 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: cover;
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .hero-section>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #233142;
+        }
+
+        .hero-subtitle {
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            color: #3c525e;
+            font-weight: 500;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            color: #4a5b66;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .hero-list {
+            list-style-type: none;
+            padding: 0;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            text-align: left;
+        }
+
+        .hero-list li {
+            padding: 8px 0;
+            position: relative;
+            padding-left: 30px;
+            font-size: 1.05rem;
+        }
+
+        .hero-list li:before {
+            content: "✓";
+            color: #3c9;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            top: 7px;
+        }
+
+        .hero-message {
+            margin-bottom: 1.5rem;
+            font-size: 1.15rem;
+            color: #3c525e;
+        }
+
+        .hero-steps {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            color: #3c525e;
+            font-weight: 500;
+        }
+
+        .btn-group {
+            margin-top: 1.5rem;
+        }
+
+        /* Services Section */
+        .services-section {
+            padding: 5rem 0;
+            background-color: white;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #233142;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title:after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: #3c9;
+        }
+
+        .section-description {
+            font-size: 1.2rem;
+            color: #6c757d;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .service-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            border-color: #3c9;
+        }
+
+        .service-icon {
+            font-size: 2.5rem;
+            color: #3c9;
+            margin-bottom: 20px;
+        }
+
+        .service-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #233142;
+        }
+
+        .service-description {
+            color: #6c757d;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Features Section (Existing) */
+        .features-section {
+            padding: 5rem 0;
+            background-color: #f9f9f9;
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .features-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #233142;
+        }
+
+        .features-description {
+            font-size: 1.2rem;
+            color: #555;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #233142;
+        }
+
+        .feature-description {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* How It Works Section */
+        .how-it-works-section {
+            padding: 5rem 0;
+            background-color: white;
+        }
+
+        .how-it-works-steps {
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            margin-bottom: 30px;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background-color: #3c9;
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex-grow: 1;
+        }
+
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #233142;
+        }
+
+        .step-description {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+
+        /* Testimonials Section */
+        .testimonials-section {
+            padding: 5rem 0;
+            background-color: #f9f9f9;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .testimonial-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .testimonial-name {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: #233142;
+        }
+
+        .testimonial-role {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .testimonial-quote {
+            font-style: italic;
+            color: #666;
+            line-height: 1.6;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .testimonial-quote:before {
+            content: '"';
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 2rem;
+            color: #ddd;
+            line-height: 1;
+        }
+
+        /* Call to Action Section */
+        .cta-section {
+            padding: 5rem 0;
+            text-align: center;
+            background: linear-gradient(135deg, #3c9 0%, #2d8fcc 100%);
+            color: white;
+        }
+
+        .cta-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-description {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            margin-top: 20px;
+        }
+
+        .cta-buttons .btn {
+            background-color: white;
+            color: #3c9;
+            margin: 0 10px;
+            font-weight: 600;
+        }
+
+        .cta-buttons .btn:hover {
+            background-color: #f8f9fa;
+            color: #2d8fcc;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+
+            nav {
+                margin-top: 15px;
+                justify-content: center;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.3rem;
+            }
+
+            .services-grid,
+            .features-grid,
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .step {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .step-number {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <header>
         <h1>Health Plus +</h1>
         <nav>
+            <!-- Authentication logic remains the same -->
             {% if user.is_authenticated %}
             <h3>{{user.username}}</h3>
             {% csrf_token %}
@@ -19,12 +505,12 @@
                 <button type="submit" class="logout-button">Logout</button>
             </form>
             {% else %}
-            <a href="/accounts/login" class="login" style='text-decoration:none; color:white;'>Login</a>
+            <a href="/accounts/login" class="login">Login</a>
             {% endif %}
         </nav>
     </header>
-    <div class="container">
 
+    <div class="container">
         <!-- Hero Section -->
         <section class="hero-section">
             <h1 class="hero-title">
@@ -32,31 +518,105 @@
                 {% if user.is_authenticated %}
                 {{ user.username }}!
                 {% else %}
-                to the Booking App!
+                to Health Plus!
                 {% endif %}
             </h1>
-            <p class="hero-subtitle">Welcome to the Health Plus Appointment Booking System!</p>
+            <p class="hero-subtitle">Your Partner in Comprehensive Healthcare</p>
             <p class="hero-description">Our platform is designed to simplify your healthcare experience. With just a few
                 clicks, you can:</p>
             <ul class="hero-list">
                 <li>Book appointments with qualified doctors</li>
                 <li>View and manage your upcoming appointments</li>
                 <li>Access valuable health tips tailored for you</li>
+                <li>Connect with specialists from various fields</li>
             </ul>
 
             {% if user.is_authenticated %}
-            <p class="hero-message">You're all set to explore your personalized dashboard, manage your appointments, and
-                discover health tips that matter to you.</p>
+            <p class="hero-message">You're all set to explore your personalized dashboard and manage your healthcare
+                journey.</p>
             <a href="/dashboard" class="btn">Go to Dashboard</a>
             {% else %}
             <p class="hero-message">Join our community to take control of your health! Sign in or create an account to
-                access your dashboard and manage your appointments.</p>
-            <p class="hero-steps">Getting started is easy:</p>
-            <a href="/accounts/login" class="btn">Sign In</a>
-            <a href="/accounts/signup" class="btn">Sign Up</a>
+                get started.</p>
+            <div class="btn-group">
+                <a href="/accounts/login" class="btn">Sign In</a>
+                <a href="/accounts/register" class="btn secondary">Sign Up</a>
+            </div>
             {% endif %}
         </section>
 
+        <!-- Services Section -->
+        <section class="services-section">
+            <div class="section-header">
+                <h2 class="section-title">Our Healthcare Services</h2>
+                <p class="section-description">
+                    We offer comprehensive medical services to address all your healthcare needs with expert care and
+                    cutting-edge technology.
+                </p>
+            </div>
+
+            <div class="services-grid">
+                <!-- Service 1 -->
+                <div class="service-card">
+                    <div class="service-icon">🏥</div>
+                    <h3 class="service-title">General Medicine</h3>
+                    <p class="service-description">
+                        Comprehensive primary care services for patients of all ages, including routine check-ups,
+                        illness diagnosis, and management of chronic conditions.
+                    </p>
+                </div>
+
+                <!-- Service 2 -->
+                <div class="service-card">
+                    <div class="service-icon">👶</div>
+                    <h3 class="service-title">Pediatrics</h3>
+                    <p class="service-description">
+                        Specialized care for infants, children, and adolescents, focusing on developmental monitoring,
+                        vaccinations, and childhood illness treatment.
+                    </p>
+                </div>
+
+                <!-- Service 3 -->
+                <div class="service-card">
+                    <div class="service-icon">❤️</div>
+                    <h3 class="service-title">Cardiology</h3>
+                    <p class="service-description">
+                        Advanced heart care including echocardiograms, stress tests, and management of hypertension,
+                        coronary artery disease, and heart failure.
+                    </p>
+                </div>
+
+                <!-- Service 4 -->
+                <div class="service-card">
+                    <div class="service-icon">🩺</div>
+                    <h3 class="service-title">Dermatology</h3>
+                    <p class="service-description">
+                        Skin care services treating acne, eczema, psoriasis, skin cancer screenings, and cosmetic
+                        dermatology procedures.
+                    </p>
+                </div>
+
+                <!-- Service 5 -->
+                <div class="service-card">
+                    <div class="service-icon">🦴</div>
+                    <h3 class="service-title">Orthopedics</h3>
+                    <p class="service-description">
+                        Specialized care for musculoskeletal issues including joint pain, sports injuries, arthritis,
+                        and providing surgical interventions when needed.
+                    </p>
+                </div>
+
+                <!-- Service 6 -->
+                <div class="service-card">
+                    <div class="service-icon">🧠</div>
+                    <h3 class="service-title">Neurology</h3>
+                    <p class="service-description">
+                        Expert diagnosis and treatment of neurological disorders including migraines, epilepsy,
+                        Parkinson's disease, and multiple sclerosis.
+                    </p>
+                </div>
+            </div>
+        </section>
 
         <!-- Features Section -->
         <section class="features-section">
@@ -73,8 +633,7 @@
                     <h3 class="feature-title">24/7 Appointment Booking</h3>
                     <p class="feature-description">
                         Schedule appointments anytime, anywhere with our easy-to-use platform. Get reminders and
-                        reschedule
-                        with just one click.
+                        reschedule with just one click.
                     </p>
                 </div>
 
@@ -83,8 +642,7 @@
                     <h3 class="feature-title">Verified Professionals</h3>
                     <p class="feature-description">
                         All our healthcare providers are rigorously vetted to ensure you receive the highest quality
-                        care
-                        from trusted experts.
+                        care from trusted experts.
                     </p>
                 </div>
 
@@ -93,84 +651,20 @@
                     <h3 class="feature-title">Digital Health Records</h3>
                     <p class="feature-description">
                         Securely access your medical history, prescriptions, and test results all in one place through
-                        our
-                        encrypted platform.
+                        our encrypted platform.
                     </p>
                 </div>
             </div>
         </section>
 
-
+        <!-- Continue with the rest of your existing sections (How It Works, Testimonials, CTA) -->
         <!-- How It Works Section -->
-        <section class="how-it-works-section">
-            <div class="how-it-works-header">
-                <h2 class="how-it-works-title">How It Works</h2>
-                <p class="how-it-works-description">
-                    Getting healthcare has never been easier. Just follow these simple steps:
-                </p>
-            </div>
-
-            <div class="how-it-works-content">
-                <div class="how-it-works-steps">
-                    <!-- Step 1 -->
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <div class="step-details">
-                            <h3 class="step-title">Create Your Profile</h3>
-                            <p class="step-description">
-                                Sign up in minutes and tell us about your health needs. Your information is kept secure
-                                and
-                                confidential.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Step 2 -->
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <div class="step-details">
-                            <h3 class="step-title">Find Your Specialist</h3>
-                            <p class="step-description">
-                                Browse our network of healthcare providers by specialty, availability, and patient
-                                reviews.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Step 3 -->
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <div class="step-details">
-                            <h3 class="step-title">Book Your Visit</h3>
-                            <p class="step-description">
-                                Select your preferred time slot and book instantly. Receive confirmation and reminders
-                                via
-                                email/SMS.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Step 4 -->
-                    <div class="step">
-                        <div class="step-number">4</div>
-                        <div class="step-details">
-                            <h3 class="step-title">Complete Your Visit</h3>
-                            <p class="step-description">
-                                Attend your appointment in-person or virtually. Access your visit summary and records
-                                afterward.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
 
         <!-- Testimonials Section -->
         <section class="testimonials-section">
-            <div class="testimonials-header">
-                <h2 class="testimonials-title">What Our Patients Say</h2>
-                <p class="testimonials-description">
+            <div class="section-header">
+                <h2 class="section-title">What Our Patients Say</h2>
+                <p class="section-description">
                     Hear from people who transformed their health with our platform.
                 </p>
             </div>
@@ -182,8 +676,7 @@
                     <p class="testimonial-role">Cardiology Patient</p>
                     <p class="testimonial-quote">
                         "Finding Dr. Johnson through HealthPlus was a lifesaver. The appointment booking was effortless,
-                        and
-                        the care I received was exceptional."
+                        and the care I received was exceptional."
                     </p>
                 </div>
 
@@ -193,8 +686,7 @@
                     <p class="testimonial-role">Pediatrics Patient</p>
                     <p class="testimonial-quote">
                         "As a busy parent, HealthPlus has been a game-changer. I can book my kids' appointments during
-                        my
-                        commute and get reminders before each visit."
+                        my commute and get reminders before each visit."
                     </p>
                 </div>
 
@@ -210,292 +702,21 @@
             </div>
         </section>
 
-
         <!-- Call to Action Section -->
         <section class="cta-section">
             <h2 class="cta-title">Ready to Take Control of Your Health?</h2>
-            <p class="cta-description">Join thousands of satisfied patients who simplified their healthcare
-                journey with HealthPlus.</p>
-            {% if user.is_authenticated %}
-            <a href="/dashboard" class="btn">Go to Dashboard</a>
-            {% else %}
-            <a href="/accounts/signup" class="btn">Get Started Free</a>
-            <a href="/accounts/login" class="btn">I Already Have an Account</a>
-            {% endif %}
+            <p class="cta-description">Join thousands of satisfied patients who simplified their healthcare journey with
+                HealthPlus.</p>
+            <div class="cta-buttons">
+                {% if user.is_authenticated %}
+                <a href="/dashboard" class="btn">Go to Dashboard</a>
+                {% else %}
+                <a href="/accounts/register" class="btn">Get Started Free</a>
+                <a href="/accounts/login" class="btn">I Already Have an Account</a>
+                {% endif %}
+            </div>
         </section>
     </div>
-    <style>
-        body {
-            font-family: "Arial", sans-serif;
-            background-color: #f4f7fa;
-            margin: 0;
-        }
-
-        header {
-            background-color: #233142;
-            /* Dark background for the header */
-            padding: 10px 20px;
-            /* Padding around the header */
-            color: white;
-            /* Text color */
-            display: flex;
-            /* Use flexbox for layout */
-            justify-content: space-between;
-            /* Space between items */
-            align-items: center;
-            /* Center items vertically */
-        }
-
-        nav {
-            display: flex;
-            /* Use flexbox for navigation items */
-            align-items: center;
-            /* Center items vertically */
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s;
-            margin: 5px;
-        }
-
-        .btn:hover {
-            background-color: #0056b3;
-            transform: scale(1.05);
-        }
-
-        /* Hero Section */
-        .hero-section {
-            text-align: center;
-            padding: 5rem 0;
-            background-color: #e0f2ff;
-        }
-
-        .hero-title {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 1.5rem;
-        }
-
-        .hero-subtitle {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .hero-description {
-            margin-bottom: 1.5rem;
-        }
-
-        .hero-list {
-            list-style-type: disc;
-            margin: 0 auto;
-            padding: 0;
-            max-width: 600px;
-            text-align: left;
-        }
-
-        .hero-message {
-            margin-bottom: 1rem;
-        }
-
-        .hero-steps {
-            margin-bottom: 2rem;
-        }
-
-        /* Features Section */
-        .features-section {
-            padding: 5rem 0;
-        }
-
-        .features-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .features-title {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .features-description {
-            font-size: 1.2rem;
-            color: #555;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .feature-card {
-            background-color: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .feature-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .feature-description {
-            color: #666;
-        }
-
-        /* How It Works Section */
-        .how-it-works-section {
-            padding: 5rem 0;
-            background-color: #f9f9f9;
-        }
-
-        .how-it-works-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .how-it-works-title {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .how-it-works-description {
-            font-size: 1.2rem;
-            color: #555;
-        }
-
-        .how-it-works-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-top: 2rem;
-        }
-
-        .how-it-works-image {
-            margin-bottom: 2rem;
-        }
-
-        .step {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .step-number {
-            background-color: #007bff;
-            color: white;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 1rem;
-        }
-
-        .step-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .step-description {
-            color: #666;
-        }
-
-        /* Testimonials Section */
-        .testimonials-section {
-            padding: 5rem 0;
-        }
-
-        .testimonials-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .testimonials-title {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .testimonials-description {
-            font-size: 1.2rem;
-            color: #555;
-        }
-
-        .testimonials-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .testimonial-card {
-            background-color: white;
-            border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .testimonial-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .testimonial-name {
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .testimonial-role {
-            color: #999;
-            margin-bottom: 1rem;
-        }
-
-        .testimonial-quote {
-            font-style: italic;
-            color: #666;
-        }
-
-        /* Call to Action Section */
-        .cta-section {
-            padding: 5rem 0;
-            text-align: center;
-            background-color: #e0f2ff;
-        }
-
-        .cta-title {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .cta-description {
-            font-size: 1.2rem;
-            color: #555;
-            margin-bottom: 2rem;
-        }
-    </style>
-
 </body>
 
 </html>

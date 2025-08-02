@@ -64,7 +64,7 @@ def appointmentBooking(request):
             send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
             messages.success(request, 'Appointment successfully scheduled! Pay Booking Fee (200/-) to secure your Appointment')
 
-            return redirect('appointmentBooking')
+            return redirect('payment')
     else:
         form = AppointmentForm()
 
@@ -73,6 +73,9 @@ def appointmentBooking(request):
         'appointment_types': AppointmentType.objects.all()  # Pass appointment types to the template
     }
     return render(request, 'appointment/appointment.html', context)
+
+def payment(request):
+    return render(request, 'appointment/payment.html')
 
 def appointmentListView(request):
     current_datetime = timezone.now()  # Get the current date and time

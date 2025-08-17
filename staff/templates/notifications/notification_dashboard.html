@@ -1,0 +1,182 @@
+{% extends 'staff.html' %}
+
+{% block content %}
+<div class="notification-dashboard">
+    <h2>Appointment Notifications</h2>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="appointment-groups">
+        <div class="group">
+            <h3>Today's Appointments</h3>
+            {% for appointment in grouped_appointments.today %}
+            <div class="appointment-card">
+                <p>{{ appointment.user.get_full_name }}</p>
+                <p>{{ appointment.appointment_type }}</p>
+                <p>{{ appointment.appointment_date }}</p>
+                <button class="btn btn-primary notify-btn" data-appointment-id="{{ appointment.id }}">
+                    Send Notification
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="group">
+            <h3>Upcoming Appointments</h3>
+            {% for appointment in grouped_appointments.upcoming %}
+            <div class="appointment-card">
+                <p>{{ appointment.user.get_full_name }}</p>
+                <p>{{ appointment.appointment_type }}</p>
+                <p>{{ appointment.appointment_date }}</p>
+                <button class="btn btn-primary notify-btn" data-appointment-id="{{ appointment.id }}">
+                    Send Notification
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Notification Modal -->
+<div id="notification-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Send Notification</h3>
+        <form id="notification-form" method="post" action="{% url 'send_notification' %}">
+            {% csrf_token %}
+            <input type="hidden" name="appointment_id" id="appointment-id">
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea name="message" class="form-control" id="message" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send Notification</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .notification-dashboard {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .appointment-groups {
+        display: flex;
+        gap: 20px;
+    }
+
+    .group {
+        flex: 1;
+    }
+
+    .appointment-card {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+    }
+
+    .btn {
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .btn:hover {
+        background-color: #0069d9;
+    }
+
+    .alert {
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+    }
+
+    .alert-success {
+        color: #3c763d;
+        background-color: #dff0d8;
+        border-color: #d6e9c6;
+    }
+
+    .alert-error {
+        color: #a94442;
+        background-color: #f2dede;
+        border-color: #ebccd1;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 60%;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover {
+        color: black;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 15px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('notification-modal');
+        const closeBtn = document.querySelector('.close');
+        const notifyBtns = document.querySelectorAll('.notify-btn');
+
+        notifyBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const appointmentId = this.getAttribute('data-appointment-id');
+                document.getElementById('appointment-id').value = appointmentId;
+                modal.style.display = 'block';
+            });
+        });
+
+        closeBtn.addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', function (event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

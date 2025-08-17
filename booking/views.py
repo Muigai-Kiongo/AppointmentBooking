@@ -8,22 +8,21 @@ from django.template.loader import render_to_string
 from weasyprint import HTML
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
+
 
 current_date = datetime.now().date()
 
-
 def index(request):
-    
     context = {
         'title': 'Home',
-        
     }
     return render(request, 'startup.html', context)
-
-
 
 @login_required
 def dashboard(request):
@@ -146,8 +145,31 @@ def list_doctors(request):
 
 @login_required
 def view_notifications(request):
-    notifications = Notification.objects.filter(user=request.user)
-    return render(request, 'notifications/notifications.html', {'notifications': notifications})
+    # Get all notifications for the logged-in user, ordered by creation date (latest first)
+    notifications = Notification.objects.filter(sender=request.user).select_related(
+        'sender', 'sender__doctor', 'related_appointment', 'related_appointment__doctor'
+    ).order_by('-created_at')
+
+    # Pagination
+    page = request.GET.get('page', 1)
+    paginator = Paginator(notifications, 10)  # Show 10 notifications per page
+
+    try:
+        notifications_page = paginator.page(page)
+    except PageNotAnInteger:
+        notifications_page = paginator.page(1)
+    except EmptyPage:
+        notifications_page = paginator.page(paginator.num_pages)
+
+    # Counts for filter options
+    unread_count = Notification.objects.filter(sender=request.user, is_read=False).count()
+    total_count = Notification.objects.filter(sender=request.user).count()
+
+    return render(request, 'notifications/notifications.html', {
+        'notifications': notifications_page,
+        'unread_count': unread_count,
+        'total_count': total_count,
+    })
 
 def reports_view(request):
     report_html = None

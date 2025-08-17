@@ -1,18 +1,63 @@
-{%extends 'index.html'%}
-{%load static%}
-{%block content%}
+{% extends 'index.html' %}
+
+{% block content %}
 <div class="container">
-    <h1>Notifications</h1>
-    <ul>
-        {%if notifications%}
+    <h2>Notification List</h2>
+
+    {% if notifications %}
+    <div class="messages">
         {% for notification in notifications %}
-        <li>
-            {{ notification.message }} - {% if notification.is_read %}Read{% else %}Unread{% endif %}
-        </li>
+        <div class="notification-card">
+            <p><strong>From:</strong> {{ notification.sender.username }}</p>
+            <p><strong>Message:</strong> {{ notification.message }}</p>
+            <p><strong>Date:</strong> {{ notification.created_at }}</p>
+        </div>
         {% endfor %}
-        {%else%}
-        <p>No Notifications at the Moment </p>
-        {%endif%}
-    </ul>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if notifications.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ notifications.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}.
+            </span>
+
+            {% if notifications.has_next %}
+            <a href="?page={{ notifications.next_page_number }}">next</a>
+            <a href="?page={{ notifications.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+    {% else %}
+    <p>No notifications found.</p>
+    {% endif %}
 </div>
-{%endblock%}
+
+<style>
+    .container {
+        padding: 20px;
+        overflow: auto;
+    }
+
+    .notification-card {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+    }
+
+    .pagination {
+        margin-top: 20px;
+    }
+
+    .pagination a {
+        margin: 0 5px;
+    }
+</style>
+{% endblock %}

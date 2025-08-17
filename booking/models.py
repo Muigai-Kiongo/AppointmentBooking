@@ -66,10 +66,28 @@ class HealthRecord(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ACTION_CHOICES = [
+        ('appointment', 'Appointment Related'),
+        ('message', 'Doctor Message'),
+        ('system', 'System Notification'),
+    ]
+
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_notifications', null=True, blank=True)
     message = models.TextField()
     is_read = models.BooleanField(default=False)
+    notification_type = models.CharField(max_length=20, choices=ACTION_CHOICES, default='system')
+    related_appointment = models.ForeignKey(
+        Appointment, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+    def __str__(self):
+        return f"Notification for {self.user.username} - {self.message[:30]}..."
 
 class Payment(models.Model):
     appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE)

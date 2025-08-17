@@ -105,6 +105,7 @@ class NotificationForm(forms.ModelForm):
         model = Notification
         fields = ['message']
 
+
 class PaymentForm(forms.ModelForm):
     class Meta:
         model = Payment

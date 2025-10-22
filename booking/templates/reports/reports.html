@@ -2,7 +2,6 @@
 
 {% block content %}
 
-
 <div class="container">
     <h1>Reports</h1>
     <h1>Generate Reports</h1>
@@ -17,69 +16,199 @@
         {% if report_html %}
         <h2>{{ report_type|title }} Report</h2>
 
-        <a href="{% url 'download_report' report_type %}" class="btn download-btn">Download PDF</a>
+        <!-- Download button: will attempt to include client-side charts when possible.
+             data-href keeps the existing GET-download fallback.
+             data-post-url is the POST endpoint to call (same download URL but using POST). -->
+        <button
+            id="download-with-charts-btn"
+            class="btn download-btn"
+            data-post-url="{% url 'download_report' report_type %}"
+            data-href="{% url 'download_report' report_type %}">
+            Download PDF 
+        </button>
+
         <div class="report-content">{{ report_html|safe }}</div>
         {% endif %}
     </div>
 </div>
 
-
 <style>
     .btn {
         display: inline-block;
-        /* Make the button a block element */
         padding: 10px 20px;
-        /* Padding for the button */
         background-color: #007bff;
-        /* Primary button color */
         color: white;
-        /* Text color */
         text-decoration: none;
-        /* Remove underline */
         border-radius: 5px;
-        /* Rounded corners */
         border: none;
-        /* Remove border */
         cursor: pointer;
-        /* Pointer cursor on hover */
         transition: background-color 0.3s;
-        /* Smooth transition for hover effect */
     }
 
     .btn:hover {
         background-color: #0056b3;
-        /* Darker shade on hover */
     }
 
     .generate-btn {
         margin-top: 10px;
-        /* Space above the generate button */
     }
 
     .report-container {
         margin-top: 20px;
         padding: 15px;
-        /* Padding inside the report container */
         background-color: #f1f1f1;
-        /* Light gray background for the report section */
         border-radius: 5px;
-        /* Rounded corners */
     }
 
     .report-content {
         margin-top: 10px;
-        /* Space above the report content */
     }
 
-    /* Responsive design */
     @media (max-width: 600px) {
-
-        .btn {
-            width: 100%;
-            /* Full width buttons on small screens */
-            text-align: center;
-            /* Center text */
-        }
+        .btn { width: 100%; text-align: center; }
     }
+
+    /* Simple spinner for UX while generating PDF */
+    .download-spinner {
+        display:inline-block;
+        width:18px;
+        height:18px;
+        border:2px solid rgba(255,255,255,0.4);
+        border-top-color:#fff;
+        border-radius:50%;
+        animation:spin 0.8s linear infinite;
+        vertical-align:middle;
+        margin-left:8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 </style>
+
+<script>
+/*
+  downloadPdfWithCharts:
+  - Finds canvas elements inside .report-content, converts them to data URLs,
+    sends them (along with report_type) in a POST JSON to the server download endpoint,
+    and triggers a download of the returned PDF blob.
+  - If no canvases are found it falls back to the original GET download link (data-href).
+  - Uses the csrf token from the form in the page.
+*/
+
+async function downloadPdfWithCharts(reportType, postUrl, fallbackHref) {
+    const btn = document.getElementById('download-with-charts-btn');
+    if (!btn) return;
+
+    // Find CSRF token value from page (form's hidden input)
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    const csrftoken = csrfInput ? csrfInput.value : '';
+
+    // Search for canvases inside the report content
+    const reportContent = document.querySelector('.report-content');
+    if (!reportContent) {
+        // fallback to direct GET
+        window.location.href = fallbackHref;
+        return;
+    }
+
+    const canvases = Array.from(reportContent.querySelectorAll('canvas'));
+    if (canvases.length === 0) {
+        // No client-side charts to capture, fall back to GET (server-side charts if available)
+        window.location.href = fallbackHref;
+        return;
+    }
+
+    // Map canvases by role (try to detect by id). Fallback: use order.
+    let img_timeline = null, img_type = null, img_status = null;
+    canvases.forEach((c, idx) => {
+        const id = (c.id || '').toLowerCase();
+        try {
+            // use JPEG at quality 0.85 for smaller payloads (but can use png)
+            const dataUrl = c.toDataURL('image/png', 0.9);
+            if (id.includes('timeline')) img_timeline = dataUrl;
+            else if (id.includes('type')) img_type = dataUrl;
+            else if (id.includes('status')) img_status = dataUrl;
+            else {
+                // assign by first/second/third if not identified
+                if (!img_timeline) img_timeline = dataUrl;
+                else if (!img_type) img_type = dataUrl;
+                else if (!img_status) img_status = dataUrl;
+            }
+        } catch (err) {
+            // Some canvases (cross-origin) may throw; ignore and continue
+            console.warn('Unable to read canvas', c, err);
+        }
+    });
+
+    // Disable button & show spinner
+    btn.disabled = true;
+    const origText = btn.innerText;
+    btn.innerText = 'Generating...';
+    const spinner = document.createElement('span');
+    spinner.className = 'download-spinner';
+    btn.appendChild(spinner);
+
+    // Prepare payload: if images are null they will be empty strings (server may generate charts)
+    const payload = {
+        report_type: reportType,
+        chart_images: {
+            timeline: img_timeline || '',
+            type: img_type || '',
+            status: img_status || ''
+        }
+    };
+
+    try {
+        const resp = await fetch(postUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify(payload),
+            credentials: 'same-origin'
+        });
+
+        if (!resp.ok) {
+            // If server returned error, fall back to GET or show message
+            const text = await resp.text();
+            console.error('PDF generation failed', resp.status, text);
+            alert('PDF generation failed on server. Falling back to download link.');
+            window.location.href = fallbackHref;
+            return;
+        }
+
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = reportType + '_report.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        console.error('Error generating PDF', err);
+        alert('Error generating PDF. Falling back to download link.');
+        window.location.href = fallbackHref;
+    } finally {
+        // restore button state
+        btn.disabled = false;
+        btn.innerText = origText;
+    }
+}
+
+// Attach click handler once DOM is ready
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('download-with-charts-btn');
+    if (!btn) return;
+    const postUrl = btn.getAttribute('data-post-url');
+    const fallbackHref = btn.getAttribute('data-href');
+    const reportType = "{{ report_type }}";
+
+    btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        downloadPdfWithCharts(reportType, postUrl, fallbackHref);
+    });
+});
+</script>
+
 {% endblock %}

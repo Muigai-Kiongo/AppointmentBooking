@@ -1,0 +1,96 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block content %}
+  <style>
+    /* Inline chat page styles (keeps visual parity with widget) */
+    .chat-page-container {
+      max-width: 920px;
+      margin: 24px auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      overflow: hidden;
+      display: flex;
+      min-height: 480px;
+    }
+    .chat-side {
+      width: 320px;
+      background: #f7f9fb;
+      padding: 16px;
+      border-right: 1px solid #eef2f7;
+    }
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-header {
+      background: #007bff;
+      color: #fff;
+      padding: 12px 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .chat-body {
+      padding: 16px;
+      height: 440px;
+      overflow:auto;
+      background: #fafafa;
+    }
+    .chat-footer {
+      padding: 12px 16px;
+      border-top: 1px solid #eee;
+      background: #fff;
+    }
+    .chat-input { width:100%; padding:8px; box-sizing:border-box; }
+    .chat-send { margin-top:8px; width:100%; padding:10px; background:#007bff; color:white; border:none; cursor:pointer; }
+    .chat-msg { margin:8px 0; padding:10px; border-radius:6px; max-width:85%; }
+    .chat-user { background:#e7f1ff; margin-left:auto; text-align:right; }
+    .chat-bot { background:#f1f1f1; margin-right:auto; text-align:left; }
+    .chat-book-link { display:block; margin-top:8px; color:#007bff; text-decoration:underline; }
+    .chat-disclaimer { font-size:12px; color:#666; margin-top:8px; }
+    @media (max-width:900px) {
+      .chat-page-container { flex-direction:column; }
+      .chat-side { width:100%; border-right:none; border-bottom:1px solid #eef2f7; }
+      .chat-body { height: 320px; }
+    }
+  </style>
+
+  <main class="chat-page-container" role="main" aria-labelledby="chat-page-title">
+    <aside class="chat-side" aria-hidden="false">
+      <h2 id="chat-page-title">Health Assistant</h2>
+      <p>Ask general health questions, get appointment suggestions, or book with a doctor.</p>
+      <div style="margin-top:12px;">
+        <a class="chat-tab-btn" href="{% url 'booking:appointmentBooking' %}" style="display:inline-block;">Book an appointment</a>
+        <a class="chat-tab-btn" href="{% url 'booking:list_doctors' %}" style="display:inline-block; margin-left:8px;">Find doctors</a>
+      </div>
+      <div style="margin-top:18px; font-size:13px; color:#555;">
+        <strong>Disclaimer:</strong>
+        <p class="chat-disclaimer">This assistant provides general guidance and is not a substitute for professional medical care.</p>
+      </div>
+    </aside>
+
+    <section class="chat-main" aria-live="polite">
+      <div class="chat-header">
+        <div>Chat with Health Assistant</div>
+        <a href="{% url 'booking:startup' %}" style="color:white; text-decoration:underline;">Back to dashboard</a>
+      </div>
+
+      <div id="chat-body" class="chat-body" role="log"></div>
+
+      <div class="chat-footer">
+        <label style="font-size:13px;">
+          <input id="chat-consent" type="checkbox" /> I consent to send non-identifying info (not medical advice)
+        </label>
+        <input id="chat-input" class="chat-input" placeholder="Describe symptoms or 'book appointment'..." aria-label="Chat input" />
+        <button id="chat-send" class="chat-send">Send</button>
+        <div id="chat-disclaimer" class="chat-disclaimer">This assistant provides general guidance and is not a substitute for professional medical care.</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Reuse the existing chat JS bundle (it posts to /chat/) -->
+  <script src="{% static 'chatbot/chat.bundle.js' %}"></script>
+{% endblock %}

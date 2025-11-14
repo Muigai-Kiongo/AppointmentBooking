@@ -12,205 +12,161 @@
     <style>
         header {
             background-color: #233142;
-            /* Dark background for the header */
             padding: 10px 20px;
-            /* Padding around the header */
             color: white;
-            /* Text color */
             display: flex;
-            /* Use flexbox for layout */
             justify-content: flex-end;
-            /* Space between items */
             align-items: center;
-            /* Center items vertically */
         }
 
         nav {
             display: flex;
-            /* Use flexbox for navigation items */
             align-items: center;
-            /* Center items vertically */
         }
 
         h3 {
             margin: 0;
-            /* Remove default margin */
             font-size: 20px;
-            /* Font size for username */
         }
 
         .login {
             margin-left: 20px;
-            /* Space between username and login link */
             padding: 10px 15px;
-            /* Padding for the login button */
             background-color: #007bff;
-            /* Primary button color */
             color: white;
-            /* Text color */
             border-radius: 5px;
-            /* Rounded corners */
             text-decoration: none;
-            /* Remove underline */
             transition: background-color 0.3s;
-            /* Smooth transition for hover effect */
         }
 
         .login:hover {
             background-color: #0056b3;
-            /* Darker shade on hover */
         }
 
         .logout-button {
             margin-left: 20px;
-            /* Space between username and logout button */
             padding: 10px 15px;
-            /* Padding for the logout button */
             background-color: #dc3545;
-            /* Danger button color */
             color: white;
-            /* Text color */
             border: none;
-            /* Remove border */
             border-radius: 5px;
-            /* Rounded corners */
             cursor: pointer;
-            /* Pointer cursor on hover */
             transition: background-color 0.3s;
-            /* Smooth transition for hover effect */
         }
 
         .logout-button:hover {
             background-color: #c82333;
-            /* Darker shade on hover */
         }
 
         .body-content {
             display: flex;
-            /* Use flexbox for body content */
         }
 
         .container {
             flex: 1;
-            /* Allow container to take up available space */
             padding: 20px;
-            /* Padding for the container */
         }
 
         .welcome-header {
             margin-bottom: 20px;
-            /* Space below the welcome header */
             font-size: 24px;
-            /* Font size for the welcome message */
             color: #333;
-            /* Darker color for better visibility */
         }
 
         .dashboard-container {
             display: flex;
-            /* Use flexbox for dashboard and appointments */
             justify-content: space-between;
-            /* Space between dashboard and appointments */
             align-items: flex-start;
-            /* Align items at the start */
             margin-bottom: 20px;
-            /* Space below the dashboard */
         }
 
         .dashboard {
             display: flex;
-            /* Use flexbox for dashboard buttons */
             flex-wrap: wrap;
-            /* Allow buttons to wrap */
             gap: 20px;
-            /* Space between buttons */
         }
 
         .dashboard-button {
             display: flex;
-            /* Flexbox for button layout */
             align-items: center;
-            /* Center items vertically */
             padding: 15px;
-            /* Padding for the button */
             background-color: #007bff;
-            /* Primary button color */
             color: white;
-            /* Text color */
             border-radius: 5px;
-            /* Rounded corners */
             text-decoration: none;
-            /* Remove underline */
             transition: background-color 0.3s;
-            /* Smooth transition for hover effect */
             flex: 1;
-            /* Allow buttons to grow */
             max-width: 150px;
-            /* Max width for buttons */
         }
 
         .dashboard-button:hover {
             background-color: #0056b3;
-            /* Darker shade on hover */
         }
 
         .upcoming-appointments {
             flex: 0 0 300px;
-            /* Fixed width for upcoming appointments */
             margin-left: 20px;
-            /* Space between dashboard and upcoming appointments */
         }
 
         p {
             color: #666;
-            /* Gray color for paragraph text */
             font-size: 16px;
-            /* Font size for paragraphs */
         }
 
         .bookBtn {
             display: inline-block;
-            /* Make the link a block element */
             padding: 10px 20px;
-            /* Padding for the button */
             background-color: #007bff;
-            /* Primary button color */
             color: white;
-            /* Text color */
             text-decoration: none;
-            /* Remove underline */
             border-radius: 5px;
-            /* Rounded corners */
             transition: background-color 0.3s;
-            /* Smooth transition for hover effect */
         }
 
         .bookBtn:hover {
             background-color: #0056b3;
-            /* Darker shade on hover */
         }
 
-        /* Responsive design */
+        /* Chat tab styles appended into the aside/nav */
+        .chat-tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f7f9fb;
+            border-radius: 6px;
+            border: 1px solid #e3e8ee;
+            color: #233142;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+
+        .chat-tab-btn:hover {
+            background: #eef6ff;
+            border-color: #cfe3ff;
+        }
+
+        /* Responsive */
         @media (max-width: 600px) {
             .bookBtn {
                 width: 100%;
-                /* Full width on small screens */
                 text-align: center;
-                /* Center text */
             }
 
             .dashboard-button {
                 flex: 1 1 100%;
-                /* Full width for buttons on small screens */
                 max-width: none;
-                /* Remove max width */
             }
 
             .upcoming-appointments {
                 margin-left: 0;
-                /* Remove margin on small screens */
                 margin-top: 20px;
-                /* Add space above */
+            }
+
+            .body-content {
+                flex-direction: column;
             }
         }
     </style>
@@ -220,26 +176,30 @@
     <header>
         <nav>
             {% if user.is_authenticated %}
-            <h3>{{user.username}}</h3>
-            {% csrf_token %}
-            <form method="post" action="{% url 'logout' %}">
+            <h3>{{ user.username }}</h3>
+            <form method="post" action="{% url 'logout' %}" style="margin:0 0 0 12px;">
                 {% csrf_token %}
                 <button type="submit" class="logout-button">Logout</button>
             </form>
             {% else %}
-            <a href="/accounts/login" class="login" style='text-decoration:none; color:white;'>Login</a>
+            <a href="{% url 'login' %}" class="login" style="text-decoration:none; color:white;">Login</a>
             {% endif %}
         </nav>
     </header>
 
-    <div class='body-content'>
-        {% include 'components/aside.html' %}
+    <div class="body-content">
+        <!-- Aside: keep your existing aside markup in components/aside.html -->
+        <div id="aside-container">
+            {% include 'components/aside.html' %}
+        </div>
+
         {% block content %}
         <div class="container">
             <h2 class="welcome-header">Welcome back, {{ user.username }}!</h2>
+
             <div class="dashboard-container">
-                <section class="dashboard">
-                    <a href="/book_appointment/" class="dashboard-button">
+                <section class="dashboard" aria-label="Quick actions">
+                    <a href="{% url 'booking:appointmentBooking' %}" class="dashboard-button" title="Book an appointment">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                             class="bi bi-book" viewBox="0 0 16 16">
                             <path
@@ -247,7 +207,8 @@
                         </svg>
                         Book Here
                     </a>
-                    <a href="/appointments" class="dashboard-button">
+
+                    <a href="{% url 'booking:appointment_list' %}" class="dashboard-button" title="My appointments">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                             class="bi bi-calendar" viewBox="0 0 16 16">
                             <path
@@ -255,7 +216,8 @@
                         </svg>
                         My Appointments
                     </a>
-                    <a href="/notifications/" class="dashboard-button">
+
+                    <a href="{% url 'booking:view_notifications' %}" class="dashboard-button" title="Notifications">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                             class="bi bi-bell" viewBox="0 0 16 16">
                             <path
@@ -263,7 +225,8 @@
                         </svg>
                         Notifications
                     </a>
-                    <a href="/reports/" class="dashboard-button">
+
+                    <a href="{% url 'booking:reports-view' %}" class="dashboard-button" title="Health reports">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                             class="bi bi-file-earmark-text" viewBox="0 0 16 16">
                             <path
@@ -271,14 +234,16 @@
                         </svg>
                         Health Reports
                     </a>
-                    <a href="/doctors/" class="dashboard-button">
+
+                    <a href="{% url 'booking:list_doctors' %}" class="dashboard-button" title="Doctors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                             class="bi bi-person" viewBox="0 0 16 16">
                             <path d="M8 0a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 10a6 6 0 0 0-6 6v1h12v-1a6 6 0 0 0-6-6z" />
                         </svg>
                         Doctors
                     </a>
-                    <a href="/accounts/profile/" class="dashboard-button">
+
+                    <a href="{% url 'booking:home' %}" class="dashboard-button" title="Profile">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
                             class="bi bi-person-circle" viewBox="0 0 16 16">
                             <path
@@ -288,7 +253,7 @@
                     </a>
                 </section>
 
-                <section class="upcoming-appointments">
+                <section class="upcoming-appointments" aria-label="Upcoming appointments">
                     <h2>Upcoming Appointments</h2>
                     <div>
                         {% if upcoming_bookings %}
@@ -310,7 +275,7 @@
                     {% if health_tips %}
                     <ul>
                         {% for tip in health_tips %}
-                        <li>{{ tip.content }}</li> <!-- Assuming 'content' is a field in HealthTip model -->
+                        <li>{{ tip.content }}</li>
                         {% endfor %}
                     </ul>
                     {% else %}
@@ -319,13 +284,73 @@
                 </div>
             </section>
 
-            <div>
+            <div style="margin-top:18px;">
                 <p>Make an Appointment Here</p>
-                <a href="/book_appointment/" aria-label="Book an appointment" class='bookBtn'>Book Here</a>
+                <a href="{% url 'booking:appointmentBooking' %}" aria-label="Book an appointment" class="bookBtn">Book Here</a>
             </div>
         </div>
         {% endblock %}
     </div>
+
+    <!-- Load the chat JS bundle (keeps JS separate; bundle will navigate to the chat page) -->
+    <script src="{% static 'chatbot/chat.bundle.js' %}"></script>
+
+    <script>
+        (function () {
+            // Insert a link-style "Chat with Assistant" tab into the aside (navigates to the chat page)
+            function createChatTab(url) {
+                var tab = document.createElement('a');
+                tab.id = 'chat-tab-button';
+                tab.className = 'chat-tab-btn';
+                tab.setAttribute('href', url);
+                tab.setAttribute('title', 'Open chat assistant');
+                tab.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" style="flex:0 0 16px;" viewBox="0 0 16 16"><path d="M8 1a7 7 0 0 0-6.468 4.69A6.5 6.5 0 0 1 8 1zm0 14a7 7 0 0 0 6.468-4.69A6.5 6.5 0 0 1 8 15zm0-2a5 5 0 1 0 0-10 5 5 0 0 0 0 10z"/></svg><span>Chat with Assistant</span>';
+                return tab;
+            }
+
+            function init() {
+                var chatPageUrl = "{% url 'chatbot:page' %}";
+                var inserted = false;
+                var insertionCandidates = [
+                    '#aside-container aside',
+                    '#aside-container .sidebar',
+                    '#aside-container',
+                    'aside',
+                    '.sidebar',
+                    '#sidebar',
+                    'nav[role="navigation"]'
+                ];
+
+                var chatTab = createChatTab(chatPageUrl);
+
+                for (var i = 0; i < insertionCandidates.length; i++) {
+                    var sel = insertionCandidates[i];
+                    var parent = document.querySelector(sel);
+                    if (parent) {
+                        parent.appendChild(chatTab);
+                        inserted = true;
+                        break;
+                    }
+                }
+
+                if (!inserted) {
+                    var fallback = document.createElement('div');
+                    fallback.style.position = 'fixed';
+                    fallback.style.left = '16px';
+                    fallback.style.bottom = '16px';
+                    fallback.style.zIndex = '9999';
+                    fallback.appendChild(chatTab);
+                    document.body.appendChild(fallback);
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
 </body>
 
 </html>

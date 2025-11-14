@@ -1,11 +1,205 @@
 {% extends 'index.html' %}
+{% load static %}
 
 {% block content %}
-<section style='flex-basis:80%;'>
-    <h1>Update Booking</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Update Booking</button>
+<main class="update-container" role="main" aria-labelledby="update-title">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'booking:appointment_list' %}">Appointments</a>
+    <span aria-hidden="true">/</span>
+    <span>Update booking</span>
+  </nav>
+
+  <section class="update-card" aria-labelledby="update-title">
+    <h1 id="update-title">Update Booking</h1>
+
+    {% if form.non_field_errors %}
+      <div class="form-errors" role="alert">
+        <strong>There were problems with your submission:</strong>
+        <ul>
+          {% for err in form.non_field_errors %}
+            <li>{{ err }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {# show selected doctor / booking summary for context #}
+    <aside class="selected-info" aria-label="Selected doctor">
+      {% if booking %}
+        <div class="summary">
+          <h2>Booking</h2>
+          <p><strong>Reference:</strong> #{{ booking.pk }}</p>
+          <p><strong>Doctor:</strong> Dr. {{ booking.doctor.user.get_full_name|default:booking.doctor.user.username }}</p>
+          <p><strong>Date:</strong> {{ booking.appointment_date|date:"F j, Y" }}</p>
+          <p><strong>Time:</strong> {{ booking.appointment_time|time:"g:i A" }}</p>
+        </div>
+      {% elif selected_doctor %}
+        <div class="summary">
+          <h2>Doctor</h2>
+          <p><strong>Name:</strong> Dr. {{ selected_doctor.user.get_full_name|default:selected_doctor.user.username }}</p>
+          <p><strong>Specialty:</strong> {{ selected_doctor.specialty|default:"—" }}</p>
+        </div>
+      {% endif %}
+    </aside>
+
+    <form method="post" class="booking-form" id="update-form" novalidate>
+      {% csrf_token %}
+      {% if selected_doctor %}
+        <input type="hidden" name="doctor_id" value="{{ selected_doctor.pk }}">
+      {% elif booking %}
+        <input type="hidden" name="doctor_id" value="{{ booking.doctor.pk }}">
+      {% endif %}
+
+      <fieldset>
+        {% for field in form %}
+          <div class="field" data-field-name="{{ field.name }}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span aria-hidden="true">*</span>{% endif %}</label>
+            {{ field }}
+            {% if field.help_text %}
+              <div class="help-text">{{ field.help_text }}</div>
+            {% endif %}
+            {% if field.errors %}
+              <ul class="field-errors" role="alert">
+                {% for err in field.errors %}
+                  <li>{{ err }}</li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </fieldset>
+
+      <div class="form-actions">
+        <button type="submit" id="submit-btn" class="btn btn-primary">Update Booking</button>
+        {% if booking %}
+          <a href="{% url 'booking:appointments-detail' booking.pk %}" class="btn btn-secondary">Cancel</a>
+        {% else %}
+          <a href="{% url 'booking:appointment_list' %}" class="btn btn-secondary">Cancel</a>
+        {% endif %}
+      </div>
     </form>
+  </section>
+</main>
+
+<style>
+/* Layout */
+html, body {
+  height: 100%;
+}
+
+.update-container {
+  max-width: 980px;
+  margin: 24px auto;
+  padding: 0 16px;
+  /* Make the container take available viewport height and allow scrolling */
+  min-height: calc(100vh - 48px);
+  box-sizing: border-box;
+}
+
+/* Card becomes an internal scrollable region if content is tall */
+.update-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(35,49,66,0.06);
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 18px;
+  align-items:start;
+
+  /* enable internal scrolling while keeping the page layout stable */
+  max-height: calc(100vh - 160px);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Keep the summary visible while the main form scrolls */
+.selected-info {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+}
+
+/* Selected / summary */
+.selected-info .summary {
+  background:#fbfdff;
+  padding:12px;
+  border:1px solid #e6eef8;
+  border-radius:8px;
+  font-size:14px;
+  color:#0f172a;
+}
+.selected-info h2 { margin:0 0 8px 0; font-size:16px; }
+
+/* Form */
+.booking-form { width:100%; }
+.field { margin-bottom:12px; }
+.field label { display:block; margin-bottom:6px; font-weight:700; color:#233142; }
+.field input[type="text"], .field input[type="date"], .field input[type="time"], .field select, .field textarea {
+  width:100%; padding:10px 12px; border:1px solid #e3e8ee; border-radius:6px; background:#fbfdff; box-sizing:border-box;
+}
+.help-text { font-size:13px; color:#6b7280; margin-top:4px; }
+.field-errors { margin:6px 0 0 0; padding-left:16px; color:#8b1f2d; }
+
+/* Actions/buttons */
+.form-actions { margin-top:14px; display:flex; gap:10px; align-items:center; padding-bottom:14px; }
+.btn { display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:6px; text-decoration:none; cursor:pointer; font-weight:600; border:none; }
+.btn-primary { background:#007bff; color:#fff; }
+.btn-secondary { background:#6c757d; color:#fff; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+
+/* Error box */
+.form-errors { border-left:4px solid #dc3545; background:#fff5f6; color:#8b1f2d; padding:10px 14px; border-radius:6px; margin-bottom:12px; }
+
+/* Responsive: stack and disable sticky on small screens; allow natural document scrolling */
+@media (max-width: 860px) {
+  .update-card { grid-template-columns: 1fr; max-height: none; overflow: visible; }
+  .selected-info { position: static; order: 2; }
+  .form-actions { position: static; }
+}
+
+/* Ensure focus outlines are visible for keyboard users */
+.booking-form :focus {
+  outline: 3px solid rgba(37,99,235,0.15);
+  outline-offset: 2px;
+}
+</style>
+
+<script>
+(function () {
+  // Prevent double-submit and provide light client-side validation for date/time.
+  const form = document.getElementById('update-form');
+  const submitBtn = document.getElementById('submit-btn');
+  if (!form) return;
+
+  // Set min date for date inputs to today
+  const dateInputs = form.querySelectorAll('input[type="date"]');
+  if (dateInputs.length) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const min = `${yyyy}-${mm}-${dd}`;
+    dateInputs.forEach(i => i.setAttribute('min', min));
+  }
+
+  form.addEventListener('submit', function (e) {
+    // Basic required fields check (works even if HTML required used)
+    const required = form.querySelectorAll('[required]');
+    for (let f of required) {
+      if (!f.value || f.value.trim() === '') {
+        e.preventDefault();
+        f.focus();
+        return;
+      }
+    }
+
+    // Disable button to prevent double submit
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.setAttribute('aria-disabled', 'true');
+      submitBtn.textContent = 'Updating...';
+    }
+  }, { once: true });
+})();
+</script>
 {% endblock %}

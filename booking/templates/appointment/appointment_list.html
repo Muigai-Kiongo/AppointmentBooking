@@ -1,85 +1,199 @@
 {% extends 'index.html' %}
+{% load static %}
 
 {% block content %}
-<div class="container">
-    <h1>Appointment History</h1>
+<main class="appointments-page" role="main" aria-labelledby="appointments-title">
+  <header class="appointments-header">
+    <h1 id="appointments-title">Appointment History</h1>
 
-    {% if upcoming_bookings %}
-    <div class="booking-list">
-        {% for booking in upcoming_bookings %}
-        <a href="{% url 'appointments-detail' booking.pk %}" class="upcoming-booking">
-            <p>
-                {{ booking.appointment_date }}, {{ booking.appointment_time }} | Doctor: {{ booking.doctor.user.username
-                }} | Type: {{ booking.appointment_type }}
-            </p>
-        </a>
-        {% endfor %}
-    </div>
-    {% else %}
-    <p>No upcoming appointments.</p>
-    {% endif %}
+    <div class="appointments-controls">
+      <div class="counts" aria-hidden="true">
+        <span class="count upcoming-count">{{ upcoming_bookings|length }} upcoming</span>
+        <span class="count past-count">{{ past_bookings|length }} past</span>
+      </div>
 
-    {% if past_bookings %}
-    <div class="booking-list">
-        {% for booking in past_bookings %}
-        <p class="past-booking">
-            {{ booking.appointment_date }}, {{ booking.appointment_time }} | Doctor: {{ booking.doctor.user.username }}
-            | Type: {{ booking.appointment_type }}
-        </p>
-        {% endfor %}
+      <div class="search-filter">
+        <input id="appointments-search" type="search" placeholder="Search by doctor, type or date" aria-label="Search appointments">
+        <select id="appointments-filter" aria-label="Filter">
+          <option value="all">All</option>
+          <option value="upcoming" selected>Upcoming</option>
+          <option value="past">Past</option>
+        </select>
+      </div>
     </div>
-    {% else %}
-    <p>No past appointments.</p>
-    {% endif %}
-</div>
+  </header>
+
+  {% if not upcoming_bookings and not past_bookings %}
+    <section class="empty-state" role="status">
+      <p>You have no appointments yet. <a href="{% url 'booking:appointmentBooking' %}">Book one now</a>.</p>
+    </section>
+  {% endif %}
+
+  {% if upcoming_bookings %}
+  <section class="appointments-section" aria-labelledby="upcoming-title" data-type="upcoming">
+    <h2 id="upcoming-title">Upcoming</h2>
+    <div class="booking-grid" id="upcoming-grid">
+      {% for booking in upcoming_bookings %}
+      <article class="booking-card" data-doctor="{{ booking.doctor.user.username|lower }}" data-type="{{ booking.appointment_type|default_if_none:''|lower }}">
+        <header class="card-header">
+          <div class="card-title">
+            <strong class="date">{{ booking.appointment_date|date:"M j, Y" }}</strong>
+            <span class="time">{{ booking.appointment_time|time:"g:i A" }}</span>
+          </div>
+          <div class="card-badges">
+            {% if booking.is_paid %}
+              <span class="badge badge-success">Paid</span>
+            {% else %}
+              <span class="badge badge-warning">Pending Payment</span>
+            {% endif %}
+          </div>
+        </header>
+
+        <div class="card-body">
+          <p class="doctor">Dr. {{ booking.doctor.user.get_full_name|default:booking.doctor.user.username }}</p>
+          <p class="meta">Type: {{ booking.appointment_type }}</p>
+        </div>
+
+        <footer class="card-actions">
+          <a class="btn btn-ghost" href="{% url 'booking:appointments-detail' booking.pk %}">View</a>
+
+          {% if not booking.is_paid %}
+            <a class="btn btn-primary" href="{% url 'booking:payment' %}?appointment_id={{ booking.pk }}">Pay</a>
+          {% endif %}
+
+          <a class="btn btn-outline" href="{% url 'booking:appointment_update' booking.pk %}">Reschedule</a>
+
+          {# Deletion should go to the confirmation page (GET) per flow described earlier #}
+          <a class="btn btn-danger" href="{% url 'booking:appointment_delete' booking.pk %}">Cancel</a>
+        </footer>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if past_bookings %}
+  <section class="appointments-section" aria-labelledby="past-title" data-type="past">
+    <h2 id="past-title">Past</h2>
+    <div class="booking-grid" id="past-grid">
+      {% for booking in past_bookings %}
+      <article class="booking-card booking-card--past" data-doctor="{{ booking.doctor.user.username|lower }}" data-type="{{ booking.appointment_type|default_if_none:''|lower }}">
+        <header class="card-header">
+          <div class="card-title">
+            <strong class="date">{{ booking.appointment_date|date:"M j, Y" }}</strong>
+            <span class="time">{{ booking.appointment_time|time:"g:i A" }}</span>
+          </div>
+          <div class="card-badges">
+            <span class="badge badge-muted">Completed</span>
+          </div>
+        </header>
+
+        <div class="card-body">
+          <p class="doctor">Dr. {{ booking.doctor.user.get_full_name|default:booking.doctor.user.username }}</p>
+          <p class="meta">Type: {{ booking.appointment_type }}</p>
+        </div>
+
+        <footer class="card-actions">
+          <a class="btn btn-ghost" href="{% url 'booking:appointments-detail' booking.pk %}">View</a>
+        </footer>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</main>
 
 <style>
-    .container {
-        padding: 20px;
-        background-color: #f9f9f9;
-        overflow-y: auto;
-    }
+/* Layout */
+.appointments-page { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
+.appointments-header { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:12px; }
+.appointments-header h1 { margin:0; font-size:24px; color:#233142; }
 
-    .booking-list {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        /* Space between items */
-    }
+.appointments-controls { display:flex; align-items:center; gap:12px; }
+.counts { color:#6b7280; font-size:13px; }
+.count { margin-right:8px; }
 
-    .past-booking {
-        background-color: rgba(255, 99, 71, 0.3);
-        /* Light red background */
-        padding: 10px;
-        border-radius: 5px;
-        /* Rounded corners */
-        box-shadow: 0 2px 5px rgba(255, 0, 0, 0.5);
-        overflow: hidden;
-        font-size: 14px;
-        /* Consistent font size */
-    }
+/* Search/filter */
+.search-filter { display:flex; gap:8px; align-items:center; }
+#appointments-search { padding:8px 10px; border:1px solid #e6eef8; border-radius:6px; width:220px; background:#fff; }
+#appointments-filter { padding:8px; border-radius:6px; border:1px solid #e6eef8; }
 
-    .upcoming-booking {
-        display: block;
-        border: thin;
-        background-color: rgba(144, 238, 144, 0.3);
-        /* Light green background */
-        padding: 10px;
-        border-radius: 5px;
-        /* Rounded corners */
-        box-shadow: 0 2px 5px rgba(0, 255, 0, 0.5);
-        text-decoration: none;
-        transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        color: black;
-        font-size: 14px;
-        /* Consistent font size */
-    }
+/* Sections */
+.appointments-section { margin-top:8px; }
+.appointments-section h2 { font-size:18px; margin:10px 0; color:#374151; }
 
-    .upcoming-booking:hover {
-        background-color: rgba(144, 238, 144, 0.5);
-        /* Darker on hover */
-        box-shadow: 0 4px 10px rgba(0, 255, 0, 0.7);
-        /* Increase shadow on hover */
-    }
+/* Grid & card */
+.booking-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px; }
+.booking-card {
+  background:#fff; border:1px solid #eef2f7; border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;
+  box-shadow: 0 6px 20px rgba(35,49,66,0.04);
+}
+.booking-card--past { opacity:0.9; background:linear-gradient(0deg,#fbfbfb,#fff); }
+
+/* Header */
+.card-header { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; }
+.card-title .date { display:block; font-weight:700; color:#0f172a; }
+.card-title .time { font-size:13px; color:#6b7280; margin-left:6px; }
+
+/* Badges */
+.badge { padding:4px 8px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; }
+.badge-success { background:#ECFDF5; color:#065f46; border:1px solid #bbf7d0; }
+.badge-warning { background:#FFFBEB; color:#92400e; border:1px solid #fde68a; }
+.badge-muted { background:#f3f4f6; color:#374151; }
+
+/* Body */
+.card-body .doctor { margin:0 0 6px 0; font-weight:600; color:#0f172a; }
+.card-body .meta { margin:0; color:#6b7280; font-size:13px; }
+
+/* Actions */
+.card-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.btn { padding:8px 10px; border-radius:8px; text-decoration:none; font-weight:600; font-size:13px; display:inline-flex; align-items:center; gap:8px; }
+.btn-ghost { background:transparent; color:#0f172a; border:1px solid transparent; }
+.btn-primary { background:#2563eb; color:#fff; }
+.btn-outline { background:#f8fafc; color:#0f172a; border:1px solid #e6eef8; }
+.btn-danger { background:#ef4444; color:#fff; }
+.btn:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(35,49,66,0.06); transition:all .12s ease; }
+
+/* Empty state */
+.empty-state { background:#fff; border:1px dashed #e6eef8; padding:18px; border-radius:8px; text-align:center; color:#374151; }
+
+/* Responsive */
+@media (max-width:720px) {
+  .appointments-header { flex-direction:column; align-items:flex-start; gap:8px; }
+  .search-filter { width:100%; }
+  #appointments-search { width:100%; }
+}
 </style>
+
+<script>
+/* Client-side filtering/search (lightweight, progressive enhancement).
+   Filters the visible cards by search text and the filter dropdown. */
+(function () {
+  const search = document.getElementById('appointments-search');
+  const filter = document.getElementById('appointments-filter');
+  const upcomingSection = document.querySelector('[data-type="upcoming"]');
+  const pastSection = document.querySelector('[data-type="past"]');
+  const allCards = () => Array.from(document.querySelectorAll('.booking-card'));
+
+  function applyFilter() {
+    const q = (search.value || '').trim().toLowerCase();
+    const mode = filter.value;
+
+    allCards().forEach(card => {
+      const doc = card.dataset.doctor || '';
+      const type = card.dataset.type || '';
+      const matchesQuery = !q || doc.includes(q) || type.includes(q) || card.innerText.toLowerCase().includes(q);
+      const isUpcoming = card.closest('[data-type="upcoming"]') !== null;
+      const showByMode = mode === 'all' || (mode === 'upcoming' && isUpcoming) || (mode === 'past' && !isUpcoming);
+
+      card.style.display = (matchesQuery && showByMode) ? '' : 'none';
+    });
+  }
+
+  if (search && filter) {
+    search.addEventListener('input', applyFilter);
+    filter.addEventListener('change', applyFilter);
+  }
+})();
+</script>
 {% endblock %}

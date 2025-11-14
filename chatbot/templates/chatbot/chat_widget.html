@@ -1,0 +1,59 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block content %}
+  <!-- Embedded CSS from the bundle (inlined here so no external CSS file is required) -->
+  <style>
+  /* chat widget inline CSS */
+  .chat-widget {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 340px;
+    max-height: 600px;
+    font-family: Arial, sans-serif;
+    z-index: 10000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+  }
+  .chat-header {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .chat-body { padding: 10px; height: 320px; overflow:auto; background:#fafafa; }
+  .chat-footer { padding: 10px; border-top: 1px solid #ddd; background:#fff; }
+  .chat-input { width:100%; padding:8px; box-sizing:border-box; margin-top:6px; }
+  .chat-send { margin-top:6px; width:100%; padding:8px; background:#007bff; color:white; border:none; cursor:pointer; }
+  .chat-msg { margin:6px 0; padding:8px; border-radius:6px; max-width:85%; }
+  .chat-user { background:#e7f1ff; margin-left:auto; text-align:right; }
+  .chat-bot { background:#f1f1f1; margin-right:auto; text-align:left; }
+  .chat-book-link { display:block; margin-top:8px; color:#007bff; text-decoration:underline; }
+  .chat-disclaimer { font-size:11px; color:#666; margin-top:8px; }
+  </style>
+
+  <!-- Chat widget markup (CSS is inline above; JS bundle below) -->
+  <div id="chat-widget" class="chat-widget" aria-live="polite" role="region">
+    <div id="chat-header" class="chat-header">
+      <span>Health Assistant</span>
+      <button id="chat-close" class="chat-close" aria-label="Close chat">✕</button>
+    </div>
+    <div id="chat-body" class="chat-body" role="log"></div>
+    <div id="chat-footer" class="chat-footer">
+      <label style="font-size:12px;">
+        <input id="chat-consent" type="checkbox" /> I consent to send non-identifying info (not medical advice)
+      </label>
+      <input id="chat-input" class="chat-input" placeholder="Describe symptoms or 'book appointment'..." aria-label="Chat input" />
+      <button id="chat-send" class="chat-send">Send</button>
+      <div id="chat-disclaimer" class="chat-disclaimer">This assistant provides general guidance and is not a substitute for professional medical care.</div>
+    </div>
+  </div>
+
+  <!-- Single bundle that contains the widget JS (CSS is inline above) -->
+  <script src="{% static 'chatbot/chat.bundle.js' %}"></script>
+{% endblock %}

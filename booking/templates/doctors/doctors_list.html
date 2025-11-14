@@ -7,6 +7,7 @@
     <h1>Available Doctors</h1>
     {% if doctors %}
         <div class="doctor-list">
+            {% url 'booking:appointmentBooking' as booking_url %}
             {% for doctor in doctors %}
                 <div class="doctor-card">
                     <h2>{{ doctor.user.username }}</h2>
@@ -17,7 +18,16 @@
                     <p><strong>Rating:</strong> {{ doctor.rating }} / 5</p>
                     <p><strong>Available Days:</strong> {{ doctor.available_days }}</p>
                     <p><strong>Available Time:</strong> {{ doctor.available_time_start }} - {{ doctor.available_time_end }}</p>
-                    <a class="btn btn-primary" href="{% url 'appointmentBooking' %}">Book Appointment</a>
+
+                    {% comment %} {# Build a booking link that pre-fills doctor_id; require login if user not authenticated #}
+                    {% with booking_url|add:"?doctor_id="|add:doctor.id as bk %}
+                        {% if user.is_authenticated %}
+                            <a class="btn btn-primary" href="{{ bk }}">Book Appointment</a>
+                        {% else %}
+                            {# Encode the next param so Django login redirects back to booking with the doctor_id #}
+                            <a class="btn btn-primary" href="{% url 'login' %}?next={{ bk|urlencode }}">Login to Book</a>
+                        {% endif %}
+                    {% endwith %} {% endcomment %}
                 </div>
             {% endfor %}
         </div>
@@ -27,16 +37,6 @@
 </div>
 
 <style>
-    {% comment %} .container {
-        max-width: 100;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    .doctor-list {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    } {% endcomment %}
     .doctor-card {
         border: 1px solid #ccc;
         border-radius: 8px;
@@ -59,6 +59,12 @@
     .btn:hover {
         background-color: #0056b3;
     }
+    .doctor-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+    }
+    .container { padding: 20px; }
 </style>
 
 {% endblock %}

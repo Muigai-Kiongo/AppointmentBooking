@@ -15,6 +15,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
 from django.db.models import Q, Count
+from django.urls import NoReverseMatch
 
 from .models import Doctor, Appointment, AppointmentType, Notification
 from .forms import AppointmentForm, ReportForm
@@ -43,23 +44,39 @@ def dashboard(request):
         'upcoming_bookings': upcoming_bookings,
     })
 
+
+
 @login_required
 def appointmentBooking(request):
+    doctor_id = request.GET.get("doctor_id") or request.POST.get("doctor_id")
+    selected_doctor = None
+    if doctor_id:
+        try:
+            selected_doctor = get_object_or_404(Doctor, pk=int(doctor_id))
+        except Exception:
+            selected_doctor = None
+
     if request.method == 'POST':
         form = AppointmentForm(request.POST)
         if form.is_valid():
             appointment = form.save(commit=False)
             appointment.user = request.user
+
+            # ensure doctor set when available
+            if getattr(appointment, "doctor", None) in (None, "") and selected_doctor:
+                appointment.doctor = selected_doctor
+
             appointment.save()
 
-            # Prepare the email
-            subject = 'Booking Successfully'
-            doctor = form.cleaned_data['doctor']
-            appointment_type = form.cleaned_data['appointment_type']
-            appointment_date = form.cleaned_data['appointment_date']
-            appointment_time = form.cleaned_data['appointment_time']
+            # Send confirmation email (fail silently)
+            try:
+                subject = 'Booking Successfully'
+                doctor = form.cleaned_data.get('doctor') or selected_doctor
+                appointment_type = form.cleaned_data.get('appointment_type')
+                appointment_date = form.cleaned_data.get('appointment_date')
+                appointment_time = form.cleaned_data.get('appointment_time')
 
-            message = f"""
+                message = f"""
 Hi {request.user.username}, you have successfully made an appointment.
 
 Details:
@@ -68,23 +85,41 @@ Appointment Type: {appointment_type}
 Appointment Date: {appointment_date}
 Appointment Time: {appointment_time}
 """
-            recipient_list = [request.user.email]
-            send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
+                recipient_list = [request.user.email]
+                send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list, fail_silently=True)
+            except Exception:
+                logger.exception("Failed to send appointment confirmation email for user %s", request.user)
+
             messages.success(request, 'Appointment successfully scheduled! Pay Booking Fee (200/-) to secure your Appointment')
 
-            return redirect('payment')
+            # Redirect to the payment page using namespaced reverse with fallback
+            try:
+                return redirect('booking:payment')   # resolves to reverse('booking:payment')
+            except NoReverseMatch:
+                try:
+                    # try reversing without namespace if your urls are not namespaced for some reason
+                    return redirect('payment')
+                except NoReverseMatch:
+                    # final fallback to hard-coded path
+                    return redirect('/payment/')
+
     else:
-        form = AppointmentForm()
+        initial = {}
+        if selected_doctor:
+            initial['doctor'] = selected_doctor.pk
+        form = AppointmentForm(initial=initial)
 
     context = {
         'form': form,
-        'appointment_types': AppointmentType.objects.all()
+        'appointment_types': AppointmentType.objects.all(),
+        'selected_doctor': selected_doctor,
     }
     return render(request, 'appointment/appointment.html', context)
 
 def payment(request):
     return render(request, 'appointment/payment.html')
 
+@login_required
 def appointmentListView(request):
     current_datetime = timezone.now()
     bookings = Appointment.objects.filter(user=request.user).order_by('appointment_date', 'appointment_time')
@@ -105,33 +140,85 @@ def appointmentListView(request):
         "current_date": current_datetime.date(),
     })
 
+@login_required
 def appointmentDetailView(request, pk):
     booking = get_object_or_404(Appointment, pk=pk)
+    # protect access to booking details
+    if booking.user != request.user and not request.user.is_staff:
+        messages.error(request, "You are not authorized to view that booking.")
+        # safe redirect to namespaced list with fallbacks
+        try:
+            return redirect("booking:appointment_list")
+        except NoReverseMatch:
+            try:
+                return redirect("appointment_list")
+            except NoReverseMatch:
+                return redirect("/appointments/")
     return render(request, "appointment/appointment_detail.html", {
         "title": "Booking Details",
         "booking": booking
     })
 
+@login_required
 def appointmentUpdateView(request, pk):
     booking = get_object_or_404(Appointment, pk=pk)
+
+    # Only owner or staff can update
+    if booking.user != request.user and not request.user.is_staff:
+        messages.error(request, "You are not authorized to update this booking.")
+        try:
+            return redirect("booking:appointments-detail", booking.pk)
+        except NoReverseMatch:
+            try:
+                return redirect("appointments-detail", booking.pk)
+            except NoReverseMatch:
+                return redirect(f"/appointment/{booking.pk}/")
+
     if request.method == "POST":
         form = AppointmentForm(request.POST, instance=booking)
         if form.is_valid():
             form.save()
-            return redirect("booking_list")
+            # redirect to appointments list (namespaced), with fallbacks
+            try:
+                return redirect("booking:appointment_list")
+            except NoReverseMatch:
+                try:
+                    return redirect("appointment_list")
+                except NoReverseMatch:
+                    return redirect("/appointments/")
     else:
         form = AppointmentForm(instance=booking)
     return render(request, "appointment/appointment_update.html", {
         "title": "Update Appointment",
-        "form": form
+        "form": form,
+        "booking": booking,
     })
 
+@login_required
 def appointmentDeleteView(request, pk):
     booking = get_object_or_404(Appointment, pk=pk)
+
+    # Only owner or staff can delete
+    if booking.user != request.user and not request.user.is_staff:
+        messages.error(request, "You are not authorized to delete this booking.")
+        try:
+            return redirect("booking:appointments-detail", booking.pk)
+        except NoReverseMatch:
+            try:
+                return redirect("appointments-detail", booking.pk)
+            except NoReverseMatch:
+                return redirect(f"/appointment/{booking.pk}/")
+
     if request.method == "POST":
         try:
             booking.delete()
-            return redirect("booking_list")
+            try:
+                return redirect("booking:appointment_list")
+            except NoReverseMatch:
+                try:
+                    return redirect("appointment_list")
+                except NoReverseMatch:
+                    return redirect("/appointments/")
         except Exception as e:
             return render(request, "appointment/appointment_delete.html", {
                 "title": "Delete Appointment",

@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'accounts',
     'booking',
     'staff',
+    'chatbot',
 ]
 
 MIDDLEWARE = [
@@ -135,3 +136,18 @@ EMAIL_HOST_USER = 'kabochakiongo@gmail.com'  # Your Gmail address
 EMAIL_HOST_PASSWORD = 'fjxr krda jgsl xudc'  # Use the app password here
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+
+
+
+# Gemini / Chatbot configuration (source values from environment; fallback to provided key)
+USE_GEMINI = os.environ.get("USE_GEMINI", "false").lower() == "true"
+GEMINI_URL = os.environ.get("GEMINI_URL", "")
+# NOTE: fallback value provided per your request. It's strongly recommended to set GEMINI_API_KEY
+# via environment variables or secret manager in production and NOT commit it to source control.
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+
+# Optional safety check
+# if USE_GEMINI and not GEMINI_URL:
+#     raise RuntimeError("GEMINI_URL must be set when USE_GEMINI is true")

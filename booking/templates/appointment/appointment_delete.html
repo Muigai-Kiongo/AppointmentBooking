@@ -1,17 +1,132 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Delete Booking</title>
-</head>
-<body>
-    <h1> Delete Booking</h1>
-    <p>Are you sure you want to delete booking {{ booking }}?</p>
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit">Delete</button>
+{% extends 'index.html' %}
+{% load static %}
+
+{% block content %}
+<main class="delete-container" role="main" aria-labelledby="delete-title">
+  <section class="delete-card">
+    <header class="delete-header">
+      <h1 id="delete-title">Delete Booking</h1>
+      <p class="muted">This action cannot be undone. Please confirm below.</p>
+    </header>
+
+    <div class="delete-body">
+      <div class="danger-icon" aria-hidden="true">⚠️</div>
+      <div class="details">
+        <p><strong>Booking:</strong> {{ booking }}</p>
+        <p><strong>Date:</strong> {{ booking.appointment_date|date:"F j, Y" }}</p>
+        <p><strong>Time:</strong> {{ booking.appointment_time|date:"g:i A" }}</p>
+        <p><strong>Doctor:</strong> {{ booking.doctor.user.username }}</p>
+        <p><strong>Type:</strong> {{ booking.appointment_type }}</p>
+      </div>
+    </div>
+
+    <form method="post" class="delete-form" novalidate>
+      {% csrf_token %}
+      <div class="actions">
+        <button type="submit" class="btn btn-danger">Delete Booking</button>
+
+        {# Cancel: go back to detail view if available, else appointments list #}
+        {% if booking %}
+          <a href="{% url 'booking:appointments-detail' booking.pk %}" class="btn btn-secondary">Cancel</a>
+        {% else %}
+          <a href="{% url 'booking:appointment_list' %}" class="btn btn-secondary">Cancel</a>
+        {% endif %}
+      </div>
     </form>
+
     {% if error %}
-        <p>{{ error }}</p>
+      <div class="error" role="alert">{{ error }}</div>
     {% endif %}
-</body>
-</html>
+  </section>
+</main>
+
+<style>
+.delete-container {
+  max-width: 820px;
+  margin: 28px auto;
+  padding: 0 16px;
+}
+.delete-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(35,49,66,0.06);
+  border: 1px solid #eef2f7;
+}
+.delete-header h1 {
+  margin: 0 0 6px;
+  color: #c82333;
+}
+.muted {
+  margin: 0 0 16px;
+  color: #6c757d;
+  font-size: 14px;
+}
+.delete-body {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 12px 0 16px;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+}
+.danger-icon {
+  font-size: 34px;
+  line-height: 1;
+  color: #c82333;
+  flex: 0 0 48px;
+  text-align: center;
+  margin-top: 6px;
+}
+.details p {
+  margin: 4px 0;
+  color: #233142;
+  font-size: 15px;
+}
+.delete-form { margin-top: 16px; }
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-danger {
+  background: #dc3545;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(220,53,69,0.12);
+}
+.btn-danger:hover { filter: brightness(0.95); }
+.btn-secondary {
+  background: #6c757d;
+  color: #fff;
+  text-decoration: none;
+}
+.btn-secondary:hover { filter: brightness(0.95); }
+
+.error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #fff5f6;
+  color: #8b1f2d;
+  border-left: 4px solid #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  .delete-body { flex-direction: column; }
+  .actions { flex-direction: column; width: 100%; }
+  .btn { width: 100%; }
+}
+</style>
+{% endblock %}
